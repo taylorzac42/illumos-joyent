@@ -16,9 +16,14 @@
 #ifndef _GFX_FB_H
 #define	_GFX_FB_H
 
+#include <sys/visual_io.h>
+#include <sys/multiboot2.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#define	EDID_MAGIC	{ 0x00, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x00 }
 
 struct edid_header {
 	uint8_t header[8];	/* fixed header pattern */
@@ -89,8 +94,20 @@ struct vesa_edid_info {
 /* Global for EDID data */
 extern struct vesa_edid_info   edid_info;
 
-#ifdef __cplusplus
+extern multiboot_tag_framebuffer_t gfx_fb;
+
+void gfx_framework_init(struct visual_ops *);
+uint32_t gfx_fb_color_map(uint8_t);
+void gfx_fb_display_cursor(struct vis_conscursor *);
+void gfx_fb_setpixel(int x, int y);
+void gfx_fb_drawrect(int x1, int y1, int x2, int y2, int fill);
+void gfx_term_drawrect(int row1, int col1, int row2, int col2);
+void gfx_fb_line(int x0, int y0, int x1, int y1);
+void gfx_fb_bezier(int x0, int y0, int x1, int y1, int x2, int y2, int width);
+void plat_cons_update_mode(void);
+
+#ifdef  __cplusplus
 }
 #endif
 
-#endif /* _GFX_FB_H */
+#endif  /* _GFX_FB_H */
