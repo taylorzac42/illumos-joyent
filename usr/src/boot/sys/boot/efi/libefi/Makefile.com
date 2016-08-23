@@ -39,7 +39,7 @@ SRCS +=	delay.c \
 OBJS=	$(SRCS:%.c=%.o)
 
 CPPFLAGS= -D_STANDALONE -DEFI
-CFLAGS  = -O2
+CFLAGS  = -Os
 
 CPPFLAGS += -nostdinc -I. -I../../../../../include -I../../../..
 CPPFLAGS += -I$(SRC)/common/ficl -I../../../libficl

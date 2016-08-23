@@ -21,7 +21,7 @@ VGATEXT_FONT	= 8x16
 VGATEXT_FONT_SRC= 8859-1
 VGATEXT_FONT_DIR= $(SRC)/uts/common/font
 
-CFLAGS=		-O2 -fno-reorder-functions
+CFLAGS=		-Os -fno-reorder-functions
 CPPFLAGS=	-D_STANDALONE -nostdinc -I../../../../include -I../../..
 CPPFLAGS +=	-I$(SRC)/uts/intel/sys/acpi
 LOADER=		loader
