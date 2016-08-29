@@ -53,6 +53,7 @@ CPPFLAGS +=	-I../../../i386/libi386
 CPPFLAGS +=	-I../../../zfs
 CPPFLAGS +=	-I../../../../cddl/boot/zfs
 CPPFLAGS +=	-I$(SRC)/uts/intel/sys/acpi
+CPPFLAGS +=	-I$(PNGLITE)
 CPPFLAGS +=	-DNO_PCI -DEFI
 
 # Export serial numbers, UUID, and asset tag from loader.

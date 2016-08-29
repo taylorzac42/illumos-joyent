@@ -16,8 +16,10 @@
 
 include $(SRC)/Makefile.master
 
-CFLAGS= -Os -I../../../../include -I../../..
-CPPFLAGS= -D_STANDALONE -DLOADER_ZFS_SUPPORT
+CFLAGS= -Os
+CPPFLAGS= -nostdinc -I../../../../include -I../../..
+CPPFLAGS += -I../../../../lib/libz
+CPPFLAGS += -D_STANDALONE -DLOADER_ZFS_SUPPORT
 
 all install: libi386.a
 
@@ -49,8 +51,10 @@ OBJS=	biosacpi.o biosdisk.o biosmem.o biospnp.o \
 	relocater_tramp.o vgasubr.o vbe.o
 
 COMMON=  ../../common
-SRCS +=	$(COMMON)/gfx_fb.c
-OBJS +=	gfx_fb.o
+PNGLITE=$(SRC)/common/pnglite
+CPPFLAGS += -I$(PNGLITE)
+SRCS +=	$(COMMON)/gfx_fb.c $(PNGLITE)/pnglite.c
+OBJS +=	gfx_fb.o pnglite.o
 
 LIBZFS=  ../../zfs
 SRCS +=	$(LIBZFS)/devicename_stubs.c
@@ -116,4 +120,7 @@ libi386.a: $(OBJS)
 	$(COMPILE.c) -o $@ $<
 
 %.o:	$(COMMON)/%.c
+	$(COMPILE.c) -o $@ $<
+
+%.o:	$(PNGLITE)/%.c
 	$(COMPILE.c) -o $@ $<

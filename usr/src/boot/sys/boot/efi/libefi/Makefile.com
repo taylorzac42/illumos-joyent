@@ -34,6 +34,7 @@ SRCS +=	delay.c \
 	gfx_fb.c \
 	handles.c \
 	libefi.c \
+	pnglite.c \
 	wchar.c
 
 OBJS=	$(SRCS:%.c=%.o)
@@ -48,6 +49,8 @@ CPPFLAGS += -I../../include/$(MACHINE)
 CPPFLAGS += -I../../../../../lib/libstand
 CPPFLAGS += -I../../../zfs
 CPPFLAGS += -I../../../../cddl/boot/zfs
+CPPFLAGS += -I../../../../../lib/libz
+CPPFLAGS += -I$(PNGLITE)
 
 # Pick up the bootstrap header for some interface items
 CPPFLAGS += -I../../../common
@@ -76,4 +79,7 @@ x86:
 	$(COMPILE.c) $<
 
 %.o:	../../../common/%.c
+	$(COMPILE.c) $<
+
+%.o:	$(PNGLITE)/%.c
 	$(COMPILE.c) $<
