@@ -24,6 +24,7 @@ VGATEXT_FONT_DIR= $(SRC)/uts/common/font
 CFLAGS=		-Os -fno-reorder-functions
 CPPFLAGS=	-D_STANDALONE -nostdinc -I../../../../include -I../../..
 CPPFLAGS +=	-I$(SRC)/uts/intel/sys/acpi
+CPPFLAGS +=	-I../../../../lib/libz
 LOADER=		loader
 NEWVERSWHAT=	"ZFS enabled bootstrap loader" x86
 
@@ -77,7 +78,6 @@ SRCS +=	dev_net.c
 
 SRCS +=	disk.c part.c
 CPPFLAGS += -DLOADER_DISK_SUPPORT
-SRCS +=	crc32.c
 CPPFLAGS += -DLOADER_GPT_SUPPORT
 CPPFLAGS += -DLOADER_MBR_SUPPORT
 
