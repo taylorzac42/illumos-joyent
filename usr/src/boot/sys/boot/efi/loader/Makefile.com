@@ -27,6 +27,8 @@ VGATEXT_FONT	= 8x16
 VGATEXT_FONT_SRC= 8859-1
 VGATEXT_FONT_DIR= $(SRC)/uts/common/font
 
+PNGLITE=	$(SRC)/common/pnglite
+
 # architecture-specific loader code
 SRCS=	autoload.c bootinfo.c conf.c copy.c efi_main.c framebuffer.c main.c \
 	self_reloc.c smbios.c acpi.c vers.c memmap.c multiboot2.c \

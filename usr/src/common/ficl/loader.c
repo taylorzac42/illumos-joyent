@@ -43,7 +43,6 @@
 #include <termios.h>
 #else
 #include <stand.h>
-#include <pnglite.h>
 #include "bootstrap.h"
 #endif
 #ifdef _STANDALONE
@@ -76,9 +75,7 @@ ficl_fb_putimage(ficlVm *pVM)
 {
 	char *namep, *name;
 	int names, ret = 0;
-#ifdef STAND
 	png_t png;
-#endif
 
 	FICL_STACK_CHECK(ficlVmGetDataStack(pVM), 2, 1);
 
@@ -91,7 +88,6 @@ ficl_fb_putimage(ficlVm *pVM)
 	strncpy(name, namep, names);
 	name[names] = '\0';
 
-#ifdef STAND
 	if ((ret = png_open(&png, name)) != PNG_NO_ERROR) {
 		ret = 0;
 		ficlFree(name);
@@ -102,7 +98,6 @@ ficl_fb_putimage(ficlVm *pVM)
 	if (gfx_fb_putimage(&png) == 0)
 		ret = -1;	/* success */
 	png_close(&png);
-#endif
 	ficlFree(name);
 	ficlStackPushInteger(ficlVmGetDataStack(pVM), ret);
 }

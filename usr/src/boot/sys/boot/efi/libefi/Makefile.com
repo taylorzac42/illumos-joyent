@@ -39,6 +39,8 @@ SRCS +=	delay.c \
 
 OBJS=	$(SRCS:%.c=%.o)
 
+PNGLITE=$(SRC)/common/pnglite
+
 CPPFLAGS= -D_STANDALONE -DEFI
 CFLAGS  = -Os
 
