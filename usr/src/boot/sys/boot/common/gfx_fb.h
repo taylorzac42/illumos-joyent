@@ -92,9 +92,6 @@ struct vesa_edid_info {
 	uint8_t checksum;
 } __packed;
 
-/* Global for EDID data */
-extern struct vesa_edid_info   edid_info;
-
 extern multiboot_tag_framebuffer_t gfx_fb;
 
 void gfx_framework_init(struct visual_ops *);
@@ -105,7 +102,7 @@ void gfx_fb_drawrect(int x1, int y1, int x2, int y2, int fill);
 void gfx_term_drawrect(int row1, int col1, int row2, int col2);
 void gfx_fb_line(int x0, int y0, int x1, int y1, int width);
 void gfx_fb_bezier(int x0, int y0, int x1, int y1, int x2, int y2, int width);
-void plat_cons_update_mode(void);
+void plat_cons_update_mode(int);
 int gfx_fb_putimage(png_t *);
 
 #ifdef  __cplusplus
