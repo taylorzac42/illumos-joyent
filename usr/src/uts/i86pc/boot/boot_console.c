@@ -578,10 +578,8 @@ bcons_init_env(struct xboot_info *xbi)
 int
 boot_fb(struct xboot_info *xbi, int console)
 {
-	if (xbi_fb_init(xbi, &bcons_dev) == B_FALSE) {
-		boot_vga_init(&bcons_dev);
+	if (xbi_fb_init(xbi, &bcons_dev) == B_FALSE)
 		return (console);
-	}
 
 	/* FB address is not set, fall back to serial terminal. */
 	if (fb_info.paddr == 0) {
@@ -592,7 +590,9 @@ boot_fb(struct xboot_info *xbi, int console)
 	fb_info.terminal.y = 34;
 	boot_fb_init(CONS_FRAMEBUFFER);
 
-	return (CONS_FRAMEBUFFER);
+	if (console == CONS_SCREEN_TEXT)
+		return (CONS_FRAMEBUFFER);
+	return (console);
 }
 
 /*
@@ -630,7 +630,7 @@ atoi(const char *p)
 static void
 bcons_init_fb(void)
 {
-	char *propval;
+	const char *propval;
 	int intval;
 
 	/* initialize with explicit default values */
@@ -729,7 +729,6 @@ void
 bcons_init(struct xboot_info *xbi)
 {
 	const char *cons_str;
-	int fb_cons;
 #if !defined(_BOOT)
 	static char console_text[] = "text";
 	extern int post_fastreboot;
@@ -833,7 +832,7 @@ bcons_init(struct xboot_info *xbi)
 #endif /* __xpv */
 
 	/* make sure the FB is set up if present */
-	fb_cons = boot_fb(xbi, console);
+	console = boot_fb(xbi, console);
 	switch (console) {
 	case CONS_TTY:
 		serial_init();
@@ -851,12 +850,12 @@ bcons_init(struct xboot_info *xbi)
 		break;
 #endif
 	case CONS_SCREEN_GRAPHICS:
-		console = fb_cons;
 		kb_init();
 		break;
 	case CONS_SCREEN_TEXT:
+		boot_vga_init(&bcons_dev);
+		/* Fall through */
 	default:
-		console = fb_cons;
 		kb_init();
 		break;
 	}
