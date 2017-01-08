@@ -28,6 +28,7 @@
 #include <sys/types.h>
 #include <sys/systm.h>
 #include <sys/archsystm.h>
+#include <sys/framebuffer.h>
 #include <sys/boot_console.h>
 #include <sys/panic.h>
 #include <sys/ctype.h>
@@ -57,7 +58,12 @@ extern int bcons_getchar_xen(void);
 extern int bcons_ischar_xen(void);
 #endif /* __xpv */
 
-static int cons_color = CONS_COLOR;
+extern boolean_t xbi_fb_init(struct xboot_info *);
+extern void boot_fb_init(int);
+extern void boot_fb_putchar(uint8_t);
+
+fb_info_t fb_info;
+static int cons_color = 0xF0;		/* black on white */
 static int console = CONS_SCREEN_TEXT;
 static int diag = CONS_INVALID;
 static int tty_num = 0;
@@ -104,9 +110,13 @@ clear_screen(void)
 	 * the cursor position is dependant upon the cursor
 	 * skew, which is initialized by vga_cursor_display()
 	 */
+	vga_init();
 	vga_cursor_display();
 	vga_clear(cons_color);
 	vga_setpos(0, 0);
+
+	fb_info.terminal.x = 80;
+	fb_info.terminal.y = 25;
 }
 
 /* Put the character C on the screen. */
@@ -608,6 +618,18 @@ bcons_init_env(struct xboot_info *xbi)
 	boot_env.be_size = modules[i].bm_size;
 }
 
+int
+boot_fb(struct xboot_info *xbi, int console)
+{
+	if (xbi_fb_init(xbi) == B_FALSE)
+		return (console);
+	fb_info.terminal.x = 80;
+	fb_info.terminal.y = 34;
+	boot_fb_init(CONS_FRAMEBUFFER);
+
+	return (CONS_FRAMEBUFFER);
+}
+
 /*
  * Go through the console_devices array trying to match the string
  * we were given.  The string on the command line must end with
@@ -648,6 +670,7 @@ void
 bcons_init(struct xboot_info *xbi)
 {
 	const char *cons_str;
+	int fb_cons;
 #if !defined(_BOOT)
 	static char console_text[] = "text";
 	extern int post_fastreboot;
@@ -747,6 +770,8 @@ bcons_init(struct xboot_info *xbi)
 	}
 #endif /* __xpv */
 
+	/* make sure the FB is set up if present */
+	fb_cons = boot_fb(xbi, console);
 	switch (console) {
 	case CONS_TTY:
 		serial_init();
@@ -764,13 +789,16 @@ bcons_init(struct xboot_info *xbi)
 		break;
 #endif
 	case CONS_SCREEN_GRAPHICS:
+		console = fb_cons;
 		kb_init();
 		break;
 	case CONS_SCREEN_TEXT:
 	default:
 #if defined(_BOOT)
-		clear_screen();	/* clears the grub or xen screen */
+		if (fb_cons != CONS_FRAMEBUFFER)
+			clear_screen();	/* clears the grub or xen screen */
 #endif /* _BOOT */
+		console = fb_cons;
 		kb_init();
 		break;
 	}
@@ -948,6 +976,9 @@ _doputchar(int device, int c)
 	case CONS_SCREEN_TEXT:
 		screen_putchar(c);
 		return;
+	case CONS_FRAMEBUFFER:
+		boot_fb_putchar(c);
+		return;
 	case CONS_SCREEN_GRAPHICS:
 #if !defined(_BOOT)
 	case CONS_USBSER:
@@ -979,12 +1010,13 @@ bcons_putchar(int c)
 		return;
 	} else  if (c == '\n' || c == '\r') {
 		bhcharpos = 0;
-		_doputchar(console, '\r');
-		_doputchar(console, c);
-		if (diag != console) {
+		if (console != CONS_FRAMEBUFFER)
+			_doputchar(console, '\r');
+		if (diag != console && diag != CONS_FRAMEBUFFER)
 			_doputchar(diag, '\r');
+		_doputchar(console, c);
+		if (diag != console)
 			_doputchar(diag, c);
-		}
 		return;
 	} else if (c == '\b') {
 		if (bhcharpos)
