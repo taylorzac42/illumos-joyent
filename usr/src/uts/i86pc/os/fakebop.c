@@ -1471,7 +1471,9 @@ build_boot_properties(struct xboot_info *xbp)
 				rdbm = &bm[i];
 				continue;
 			}
-			if (bm[i].bm_type == BMT_HASH || bm[i].bm_name == NULL)
+			if (bm[i].bm_type == BMT_HASH ||
+			    bm[i].bm_type == BMT_FONT ||
+			    bm[i].bm_name == NULL)
 				continue;
 
 			if (bm[i].bm_type == BMT_ENV) {
