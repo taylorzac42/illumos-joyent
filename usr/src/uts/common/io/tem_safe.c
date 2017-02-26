@@ -1487,12 +1487,12 @@ tem_safe_text_display(struct tem_vt_state *tem, tem_char_t *string,
 {
 	struct vis_consdisplay da;
 	int i;
-	uint8_t c;
+	tem_char_t c;
 
 	ASSERT((MUTEX_HELD(&tems.ts_lock) && MUTEX_HELD(&tem->tvs_lock)) ||
 	    called_from == CALLED_FROM_STANDALONE);
 
-	da.data = &c;
+	da.data = (uint8_t *)&c;
 	da.width = 1;
 	da.row = row;
 	da.col = col;
@@ -1501,11 +1501,7 @@ tem_safe_text_display(struct tem_vt_state *tem, tem_char_t *string,
 	da.bg_color = bg_color;
 
 	for (i = 0; i < count; i++) {
-		/* VGATEXT can only display single byte chars. */
-		if (string[i] > 0xff)
-			c = '?';
-		else
-			c = (uint8_t)string[i];
+		c = TEM_CHAR(string[i]);
 		tems_safe_display(&da, credp, called_from);
 		da.col++;
 	}
@@ -1602,8 +1598,8 @@ tem_safe_pix_display(struct tem_vt_state *tem,
 	    called_from == CALLED_FROM_STANDALONE);
 
 	da.data = (uchar_t *)tem->tvs_pix_data;
-	da.width = tems.ts_font.width;
-	da.height = tems.ts_font.height;
+	da.width = (screen_size_t)tems.ts_font.vf_width;
+	da.height = (screen_size_t)tems.ts_font.vf_height;
 	da.row = (row * da.height) + tems.ts_p_offset.y;
 	da.col = (col * da.width) + tems.ts_p_offset.x;
 
@@ -1641,9 +1637,10 @@ tem_safe_pix_copy(struct tem_vt_state *tem,
 	}
 	need_clear = B_FALSE;
 
-	ma.s_row = s_row * tems.ts_font.height + tems.ts_p_offset.y;
-	ma.e_row = (e_row + 1) * tems.ts_font.height + tems.ts_p_offset.y - 1;
-	ma.t_row = t_row * tems.ts_font.height + tems.ts_p_offset.y;
+	ma.s_row = s_row * tems.ts_font.vf_height + tems.ts_p_offset.y;
+	ma.e_row = (e_row + 1) * tems.ts_font.vf_height +
+	    tems.ts_p_offset.y - 1;
+	ma.t_row = t_row * tems.ts_font.vf_height + tems.ts_p_offset.y;
 
 	/*
 	 * Check if we're in process of clearing OBP's columns area,
@@ -1655,15 +1652,15 @@ tem_safe_pix_copy(struct tem_vt_state *tem,
 		 * We need to clear OBP's columns area outside our kernel
 		 * console term. So that we set ma.e_col to entire row here.
 		 */
-		ma.s_col = s_col * tems.ts_font.width;
+		ma.s_col = s_col * tems.ts_font.vf_width;
 		ma.e_col = tems.ts_p_dimension.width - 1;
 
-		ma.t_col = t_col * tems.ts_font.width;
+		ma.t_col = t_col * tems.ts_font.vf_width;
 	} else {
-		ma.s_col = s_col * tems.ts_font.width + tems.ts_p_offset.x;
-		ma.e_col = (e_col + 1) * tems.ts_font.width +
+		ma.s_col = s_col * tems.ts_font.vf_width + tems.ts_p_offset.x;
+		ma.e_col = (e_col + 1) * tems.ts_font.vf_width +
 		    tems.ts_p_offset.x - 1;
-		ma.t_col = t_col * tems.ts_font.width + tems.ts_p_offset.x;
+		ma.t_col = t_col * tems.ts_font.vf_width + tems.ts_p_offset.x;
 	}
 
 	tems_safe_copy(&ma, credp, called_from);
@@ -1756,8 +1753,8 @@ tem_safe_pix_clear_prom_output(struct tem_vt_state *tem, cred_t *credp,
 	ASSERT((MUTEX_HELD(&tems.ts_lock) && MUTEX_HELD(&tem->tvs_lock)) ||
 	    called_from == CALLED_FROM_STANDALONE);
 
-	width = tems.ts_font.width;
-	height = tems.ts_font.height;
+	width = tems.ts_font.vf_width;
+	height = tems.ts_font.vf_height;
 	offset = tems.ts_p_offset.y % height;
 
 	nrows = tems.ts_p_offset.y / height;
@@ -1790,8 +1787,8 @@ tem_safe_pix_clear_entire_screen(struct tem_vt_state *tem, cred_t *credp,
 	if (tems_cls_layered(&cl, credp) == 0)
 		return;
 
-	width = tems.ts_font.width;
-	height = tems.ts_font.height;
+	width = tems.ts_font.vf_width;
+	height = tems.ts_font.vf_height;
 
 	nrows = (tems.ts_p_dimension.height + (height - 1))/ height;
 	ncols = (tems.ts_p_dimension.width + (width - 1))/ width;
@@ -2121,12 +2118,12 @@ tem_safe_pix_cursor(struct tem_vt_state *tem, short action,
 	ASSERT((MUTEX_HELD(&tems.ts_lock) && MUTEX_HELD(&tem->tvs_lock)) ||
 	    called_from == CALLED_FROM_STANDALONE);
 
-	ca.row = tem->tvs_c_cursor.row * tems.ts_font.height +
+	ca.row = tem->tvs_c_cursor.row * tems.ts_font.vf_height +
 	    tems.ts_p_offset.y;
-	ca.col = tem->tvs_c_cursor.col * tems.ts_font.width +
+	ca.col = tem->tvs_c_cursor.col * tems.ts_font.vf_width +
 	    tems.ts_p_offset.x;
-	ca.width = tems.ts_font.width;
-	ca.height = tems.ts_font.height;
+	ca.width = (screen_size_t)tems.ts_font.vf_width;
+	ca.height = (screen_size_t)tems.ts_font.vf_height;
 
 	tem_safe_get_color(tem, &fg, &bg, TEM_ATTR_REVERSE);
 
@@ -2185,9 +2182,9 @@ tem_safe_pix_cursor(struct tem_vt_state *tem, short action,
 
 	if (action == VIS_GET_CURSOR) {
 		tem->tvs_c_cursor.row = (ca.row - tems.ts_p_offset.y) /
-		    tems.ts_font.height;
+		    tems.ts_font.vf_height;
 		tem->tvs_c_cursor.col = (ca.col - tems.ts_p_offset.x) /
-		    tems.ts_font.width;
+		    tems.ts_font.vf_width;
 	}
 }
 
@@ -2336,8 +2333,8 @@ tem_safe_pix_cls_range(struct tem_vt_state *tem,
 	if (sroll_up)
 		row_add = tems.ts_c_dimension.height - 1;
 
-	da.width = tems.ts_font.width;
-	da.height = tems.ts_font.height;
+	da.width = (screen_size_t)tems.ts_font.vf_width;
+	da.height = (screen_size_t)tems.ts_font.vf_height;
 
 	tem_safe_get_color(tem, &fg_color, &bg_color, TEM_ATTR_SCREEN_REVERSE);
 
