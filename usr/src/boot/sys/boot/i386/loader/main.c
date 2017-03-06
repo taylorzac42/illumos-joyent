@@ -171,6 +171,7 @@ main(void)
     for (i = 0; devsw[i] != NULL; i++)
 	if (devsw[i]->dv_init != NULL)
 	    (devsw[i]->dv_init)();
+
     printf("BIOS %dkB/%dkB available memory\n", bios_basemem / 1024, bios_extmem / 1024);
     if (initial_bootinfo != NULL) {
 	initial_bootinfo->bi_basemem = bios_basemem / 1024;
@@ -188,7 +189,8 @@ main(void)
 
     printf("\n%s", bootprog_info);
 
-    extract_currdev();				/* set $currdev and $loaddev */
+    extract_currdev();			/* set $currdev and $loaddev */
+    autoload_font();			/* Set up the font list for console. */
 
     bi_isadir();
     bios_getsmap();
