@@ -36,8 +36,8 @@ REL1=	0x700
 ORG1=	0x7c00
 ORG2=	0x0
 
-CPPFLAGS=
-CFLAGS=	-nostdinc -DBOOTPROG=\"gptzfsboot\" \
+CPPFLAGS=	-nostdinc
+CFLAGS=	-DBOOTPROG=\"gptzfsboot\" \
 	-O1 \
 	-DGPT -DBOOT2 \
 	-DLOADER_MBR_SUPPORT -DLOADER_GPT_SUPPORT \
@@ -68,6 +68,8 @@ LIBSTAND=	../../libstand/$(MACH)/libstand.a
 LIBZFSBOOT=	../../zfs/$(MACH)/libzfsboot.a
 
 include ../Makefile.inc
+
+CPPFLAGS +=	-I$(SRC)/uts/common
 
 .PARALLEL:
 

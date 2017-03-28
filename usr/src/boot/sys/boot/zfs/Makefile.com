@@ -48,6 +48,8 @@ CPPFLAGS +=	-DSKEIN_LOOP=111
 
 #include ../../Makefile.inc
 
+CPPFLAGS +=	-I$(SRC)/uts/common
+
 CLEANFILES +=    machine
 
 machine:

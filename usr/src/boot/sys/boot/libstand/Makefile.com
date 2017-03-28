@@ -36,6 +36,8 @@ $(LIBRARY): $(SRCS) $(OBJS)
 
 include $(LIBSTAND_SRC)/Makefile.inc
 
+CPPFLAGS +=	-I$(SRC)/uts/common
+
 clean: clobber
 clobber:
 	$(RM) $(CLEANFILES) $(OBJS) machine $(LIBRARY)
