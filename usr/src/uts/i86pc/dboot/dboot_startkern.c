@@ -41,6 +41,13 @@
 #include <util/strtolctype.h>
 #include <sys/efi.h>
 
+/*
+ * Compile time debug knob. We do not have any early mechanism to control it
+ * as the boot is the earliest mechanism we have, and we do not want to have
+ * it being switched on by default.
+ */
+int dboot_debug = 0;
+
 #if defined(__xpv)
 
 #include <sys/hypervisor.h>
@@ -2243,6 +2250,8 @@ startup_kernel(void)
 	physdev_set_iopl_t set_iopl;
 #endif /* __xpv */
 
+	if (dboot_debug == 1)
+		bcons_init(NULL);	/* Set very early console to ttya. */
 	dboot_loader_init();
 	/*
 	 * At this point we are executing in a 32 bit real mode.
@@ -2264,7 +2273,7 @@ startup_kernel(void)
 
 	dboot_init_xboot_consinfo();
 	bi->bi_cmdline = (native_ptr_t)(uintptr_t)cmdline;
-	bcons_init(bi);
+	bcons_init(bi);		/* Now we can set the real console. */
 
 	prom_debug = (find_boot_prop("prom_debug") != NULL);
 	map_debug = (find_boot_prop("map_debug") != NULL);
