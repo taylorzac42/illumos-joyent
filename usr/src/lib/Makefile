@@ -177,6 +177,7 @@ SUBDIRS +=				\
 	libpam		\
 	libpcidb	\
 	libpctx		\
+	libperiodic	\
 	libpicl		\
 	libpicltree	\
 	libpkg		\
@@ -442,6 +443,7 @@ HDRSUBDIRS=				\
 	libpam		\
 	libpcidb	\
 	libpctx		\
+	libperiodic	\
 	libpicl		\
 	libpicltree	\
 	libpool		\
@@ -648,6 +650,7 @@ libnisdb:	libldap5
 libnwam:	libscf libbsm libdladm libipadm
 libpcp:		libumem libdevinfo
 libpctx:	libproc
+libperiodic:	libumem libavl librefhash libidspace
 libpkg:		libscf libadm
 libpool:	libscf libexacct
 libpp:		libast
