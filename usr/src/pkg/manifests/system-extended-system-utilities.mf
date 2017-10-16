@@ -133,6 +133,9 @@ file path=usr/bin/unpack mode=0555
 file path=usr/bin/uudecode group=uucp mode=0555
 file path=usr/bin/uuencode group=uucp mode=0555
 file path=usr/bin/yes mode=0555
+file path=usr/bin/zstd mode=0555
+file path=usr/bin/zstdgrep mode=0555
+file path=usr/lib/$(ARCH64)/libzstd.so.1
 file path=usr/lib/$(ARCH64)/madv.so.1
 file path=usr/lib/$(ARCH64)/mpss.so.1
 file path=usr/lib/adb/$(ARCH64)/adbsub.o group=sys
@@ -146,6 +149,7 @@ file path=usr/lib/fs/pcfs/fsck mode=0555
 file path=usr/lib/fs/pcfs/fstyp.so.1 mode=0555
 file path=usr/lib/fs/pcfs/mkfs mode=0555
 file path=usr/lib/fs/pcfs/mount mode=0555
+file path=usr/lib/libzstd.so.1
 file path=usr/lib/madv.so.1
 file path=usr/lib/mpss.so.1
 file path=usr/lib/spell/compress mode=0555
@@ -205,6 +209,7 @@ file path=usr/share/man/man1/tcopy.1
 file path=usr/share/man/man1/units.1
 file path=usr/share/man/man1/unix2dos.1
 file path=usr/share/man/man1/yes.1
+file path=usr/share/man/man1/zstd.1
 file path=usr/share/man/man1m/adbgen.1m
 file path=usr/share/man/man1m/dmesg.1m
 file path=usr/share/man/man1m/fsck_pcfs.1m
@@ -238,7 +243,9 @@ hardlink path=usr/bin/pwait target=../../usr/lib/isaexec
 hardlink path=usr/bin/pwdx target=../../usr/lib/isaexec
 hardlink path=usr/bin/sort target=../../usr/lib/isaexec
 hardlink path=usr/bin/uncompress target=../../usr/bin/compress
+hardlink path=usr/bin/unzstd target=../../usr/bin/zstd
 hardlink path=usr/bin/zcat target=../../usr/bin/compress
+hardlink path=usr/bin/zstdcat target=../../usr/bin/zstd
 hardlink path=usr/lib/fs/pcfs/fstyp target=../../../sbin/fstyp
 legacy pkg=SUNWesu \
     desc="additional UNIX system utilities, including awk, bc, cal, compress, diff, dos2unix, last, rup, sort, spell, uniq, and uuencode" \
@@ -277,5 +284,7 @@ link path=usr/share/man/man1/spellin.1 target=spell.1
 link path=usr/share/man/man1/uncompress.1 target=compress.1
 link path=usr/share/man/man1/unexpand.1 target=expand.1
 link path=usr/share/man/man1/unpack.1 target=pack.1
+link path=usr/share/man/man1/unzstd.1 target=zstd.1
 link path=usr/share/man/man1/zcat.1 target=compress.1
+link path=usr/share/man/man1/zstdcat.1 target=zstd.1
 depend fmri=runtime/perl$(PERL_PKGVERS) type=require

@@ -536,6 +536,7 @@ MANLINKS=	batch.1		\
 		unset.1		\
 		unsetenv.1	\
 		until.1		\
+		unzstd.1	\
 		valdate.1	\
 		valgid.1	\
 		valint.1	\
@@ -549,7 +550,8 @@ MANLINKS=	batch.1		\
 		whatis.1	\
 		whence.1	\
 		while.1		\
-		zcat.1
+		zcat.1		\
+		zstdcat.1
 
 intro.1		:= LINKSRC = Intro.1
 
@@ -738,8 +740,17 @@ edit.1		:= LINKSRC = ../../../has/man/man1has/edit.1has
 
 vedit.1		:= LINKSRC = ../../../has/man/man1has/vi.1has
 
+# zstd
+unzstd.1	:= LINKSRC = zstd.1
+zstdcat.1	:= LINKSRC = zstd.1
+
 .KEEP_STATE:
 
 include		$(SRC)/man/Makefile.man
 
+ROOTMANFILES +=	$(ROOTMAN)/man$(MANSECT)/zstd.1
+
 install:	$(ROOTMANFILES) $(ROOTMANLINKS)
+
+$(ROOTMAN)/man$(MANSECT)/% : $(SRC)/../../contrib/zstd/programs/%
+	$(INS.file)

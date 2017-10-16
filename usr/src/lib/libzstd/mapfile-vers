@@ -1,0 +1,189 @@
+#
+# This file and its contents are supplied under the terms of the
+# Common Development and Distribution License ("CDDL"), version 1.0.
+# You may only use this file in accordance with the terms of version
+# 1.0 of the CDDL.
+#
+# A full copy of the text of the CDDL should have accompanied this
+# source.  A copy of the CDDL is also available via the Internet at
+# http://www.illumos.org/license/CDDL.
+#
+
+#
+# Copyright 2017 Toomas Soome <tsoome@me.com>
+#
+
+#
+# MAPFILE HEADER START
+#
+# WARNING:  STOP NOW.  DO NOT MODIFY THIS FILE.
+# Object versioning must comply with the rules detailed in
+#
+#	usr/src/lib/README.mapfiles
+#
+# You should not be making modifications here until you've read the most current
+# copy of that file. If you need help, contact a gatekeeper for guidance.
+#
+# MAPFILE HEADER END
+#
+
+$mapfile_version 2
+
+SYMBOL_VERSION ILLUMOSprivate {
+    global:
+	ERR_getErrorString;
+	ZDICT_getErrorName;
+	ZDICT_isError;
+	ZDICT_optimizeTrainFromBuffer_cover;
+	ZDICT_trainFromBuffer_cover;
+	ZDICT_trainFromBuffer_unsafe_legacy;
+	ZSTD_CCtx_loadDictionary_byReference;
+	ZSTD_CCtx_loadDictionary_advanced;
+	ZSTD_CCtx_loadDictionary;
+	ZSTD_CCtx_refCDict;
+	ZSTD_CCtx_refPrefix_advanced;
+	ZSTD_CCtx_refPrefix;
+	ZSTD_CCtx_reset;
+	ZSTD_CCtx_setParameter;
+	ZSTD_CCtx_setParametersUsingCCtxParams;
+	ZSTD_CCtx_setPledgedSrcSize;
+	ZSTD_CCtxParam_setParameter;
+#	ZSTD_DCtx_loadDictionary_advanced;	/* not implemented in 1.3.2 */
+#	ZSTD_DCtx_loadDictionary_byReference;	/* not implemented in 1.3.2 */
+#	ZSTD_DCtx_loadDictionary;		/* not implemented in 1.3.2 */
+#	ZSTD_DCtx_refDDict;			/* not implemented in 1.3.2 */
+#	ZSTD_DCtx_refPrefix_advanced;		/* not implemented in 1.3.2 */
+#	ZSTD_DCtx_refPrefix;			/* not implemented in 1.3.2 */
+	ZSTD_DCtx_reset;
+	ZSTD_DCtx_setFormat;
+	ZSTD_DCtx_setMaxWindowSize;
+	ZSTD_adjustCParams;
+	ZSTD_checkCParams;
+	ZSTD_compress_advanced;
+	ZSTD_compress_generic;
+	ZSTD_compress_usingCDict_advanced;
+	ZSTD_compress_usingCDict;
+	ZSTD_compress_usingDict;
+	ZSTD_compress;
+	ZSTD_compressBegin_advanced;
+	ZSTD_compressBegin_usingCDict_advanced;
+	ZSTD_compressBegin_usingCDict;
+	ZSTD_compressBegin_usingDict;
+	ZSTD_compressBegin;
+	ZSTD_compressBlock;
+	ZSTD_compressBound;
+	ZSTD_compressCCtx;
+	ZSTD_compressContinue;
+	ZSTD_compressEnd;
+	ZSTD_compressStream;
+	ZSTD_copyCCtx;
+	ZSTD_copyDCtx;
+	ZSTD_createCCtx_advanced;
+	ZSTD_createCCtx;
+	ZSTD_createCCtxParams;
+	ZSTD_createCDict_advanced;
+	ZSTD_createCDict_byReference;
+	ZSTD_createCDict;
+	ZSTD_createCStream_advanced;
+	ZSTD_createCStream;
+	ZSTD_createDCtx_advanced;
+	ZSTD_createDCtx;
+	ZSTD_createDDict_advanced;
+	ZSTD_createDDict_byReference;
+	ZSTD_createDDict;
+	ZSTD_createDStream_advanced;
+	ZSTD_createDStream;
+	ZSTD_CStreamInSize;
+	ZSTD_CStreamOutSize;
+	ZSTD_decodingBufferSize_min;
+	ZSTD_decompress_generic_simpleArgs;
+	ZSTD_decompress_generic;
+	ZSTD_decompress_usingDDict;
+	ZSTD_decompress_usingDict;
+	ZSTD_decompress;
+	ZSTD_decompressBegin_usingDDict;
+	ZSTD_decompressBegin_usingDict;
+	ZSTD_decompressBegin;
+	ZSTD_decompressBlock;
+	ZSTD_decompressContinue;
+	ZSTD_decompressDCtx;
+	ZSTD_decompressStream;
+	ZSTD_DStreamInSize;
+	ZSTD_DStreamOutSize;
+	ZSTD_endStream;
+	ZSTD_estimateCCtxSize_usingCParams;
+	ZSTD_estimateCCtxSize_usingCCtxParams;
+	ZSTD_estimateCCtxSize;
+	ZSTD_estimateCDictSize_advanced;
+	ZSTD_estimateCDictSize;
+	ZSTD_estimateCStreamSize_usingCParams;
+	ZSTD_estimateCStreamSize_usingCCtxParams;
+	ZSTD_estimateCStreamSize;
+	ZSTD_estimateDCtxSize;
+	ZSTD_estimateDDictSize;
+	ZSTD_estimateDStreamSize_fromFrame;
+	ZSTD_estimateDStreamSize;
+	ZSTD_findDecompressedSize;
+	ZSTD_findFrameCompressedSize;
+	ZSTD_flushStream;
+	ZSTD_frameHeaderSize;
+	ZSTD_freeCCtx;
+	ZSTD_freeCCtxParams;
+	ZSTD_freeCDict;
+	ZSTD_freeCStream;
+	ZSTD_freeDCtx;
+	ZSTD_freeDDict;
+	ZSTD_freeDStream;
+	ZSTD_getBlockSize;
+	ZSTD_getCParams;
+	ZSTD_getDecompressedSize;
+	ZSTD_getDictID_fromDDict;
+	ZSTD_getDictID_fromDict;
+	ZSTD_getDictID_fromFrame;
+	ZSTD_getErrorCode;
+	ZSTD_getErrorName;
+	ZSTD_getErrorString;
+	ZSTD_getFrameContentSize;
+	ZSTD_getFrameHeader;
+	ZSTD_getParams;
+	ZSTD_initCCtxParams_advanced;
+	ZSTD_initCCtxParams;
+	ZSTD_initCStream_advanced;
+	ZSTD_initCStream_srcSize;
+	ZSTD_initCStream_usingCDict_advanced;
+	ZSTD_initCStream_usingCDict;
+	ZSTD_initCStream_usingDict;
+	ZSTD_initCStream;
+	ZSTD_initDStream_usingDDict;
+	ZSTD_initDStream_usingDict;
+	ZSTD_initDStream;
+	ZSTD_initStaticCCtx;
+	ZSTD_initStaticCDict;
+	ZSTD_initStaticCStream;
+	ZSTD_initStaticDCtx;
+	ZSTD_initStaticDDict;
+	ZSTD_initStaticDStream;
+	ZSTD_insertBlock;
+	ZSTD_isError;
+	ZSTD_isFrame;
+	ZSTD_maxCLevel;
+	ZSTD_nextInputType;
+	ZSTD_nextSrcSizeToDecompress;
+	ZSTD_resetCCtxParams;
+	ZSTD_resetCStream;
+	ZSTD_resetDStream;
+	ZSTD_setDStreamParameter;
+	ZSTD_sizeof_CCtx;
+	ZSTD_sizeof_CDict;
+	ZSTD_sizeof_CStream;
+	ZSTD_sizeof_DCtx;
+	ZSTD_sizeof_DDict;
+	ZSTD_sizeof_DStream;
+	ZSTD_versionNumber;
+	ZSTD_versionString;
+	ZSTD_XXH64;
+	ZSTDMT_createCCtx;
+	ZSTDMT_freeCCtx;
+    local:
+	*;
+};

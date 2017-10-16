@@ -1019,3 +1019,11 @@ lib/sparcv9/llib-lcustr.ln	sparc
 lib/libcustr.so
 lib/llib-lcustr
 lib/llib-lcustr.ln
+
+#
+# zstd is private
+#
+usr/include/zstd.h
+usr/lib/amd64/libzstd.so		i386
+usr/lib/sparcv9/libzstd.so		sparc
+usr/lib/libzstd.so
