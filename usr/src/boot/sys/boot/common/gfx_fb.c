@@ -321,6 +321,9 @@ gfx_fb_cons_clear(struct vis_consclear *ca)
 	int i, j, width, height, pitch;
 #if defined (EFI)
 	EFI_TPL tpl;
+	EFI_GRAPHICS_OUTPUT_BLT_PIXEL *BltBuffer;
+	EFI_STATUS status;
+	extern EFI_GRAPHICS_OUTPUT *gop;
 #endif
 
 	fb = gfx_get_fb_address();
@@ -330,7 +333,15 @@ gfx_fb_cons_clear(struct vis_consclear *ca)
 
 	data = gfx_fb_color_map(ca->bg_color);
 #if defined (EFI)
+	BltBuffer = (EFI_GRAPHICS_OUTPUT_BLT_PIXEL *)&data;
 	tpl = BS->RaiseTPL(TPL_NOTIFY);
+	status = gop->Blt(gop, BltBuffer, EfiBltVideoFill, 0, 0,
+	    0, 0, width, height, 0);
+	BS->RestoreTPL(tpl);
+	if (EFI_ERROR(status))
+		return (1);
+	else
+		return (0);
 #endif
 	switch (gfx_fb.framebuffer_common.framebuffer_bpp) {
 	case 8:		/* 8 bit */
@@ -380,6 +391,8 @@ gfx_fb_cons_copy(struct vis_conscopy *ma)
 	int i, bpp, pitch;
 #if defined (EFI)
 	EFI_TPL tpl;
+	/* EFI_STATUS status; */
+	extern EFI_GRAPHICS_OUTPUT *gop;
 #endif
 
 	fb = gfx_get_fb_address();
@@ -394,7 +407,22 @@ gfx_fb_cons_copy(struct vis_conscopy *ma)
 	height = ma->e_row - ma->s_row + 1;
 
 #if defined (EFI)
+/*
+	width = ma->e_col - ma->s_col + 1;
+	height = ma->e_row - ma->s_row + 1;
+*/
 	tpl = BS->RaiseTPL(TPL_NOTIFY);
+/*
+	if (toffset <= soffset) {
+	status = gop->Blt(gop, NULL, EfiBltVideoToVideo, ma->t_col, ma->t_row,
+	    ma->s_col, ma->s_row, width, height, 0);
+	} else {
+	status = gop->Blt(gop, NULL, EfiBltVideoToVideo, ma->s_col, ma->s_row,
+	    ma->t_col, ma->t_row, width, height, 0);
+	}
+	BS->RestoreTPL(tpl);
+	return;
+*/
 #endif
 	if (toffset <= soffset) {
 		for (i = 0; i < height; i++) {
