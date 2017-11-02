@@ -1,4 +1,4 @@
-/*-
+/*
  * spinconsole.c
  *
  * Author: Maksym Sobolyev <sobomax@sippysoft.com>
@@ -63,44 +63,58 @@ struct console spinconsole = {
 static void
 spinc_probe(struct console *cp)
 {
-	cp->c_flags |= (C_PRESENTIN | C_PRESENTOUT);
+	int i;
+	struct console *parent;
+
+	if (cp->c_private == NULL) {
+		for (i = 0; consoles[i] != NULL; i++)
+			if (strcmp(consoles[i]->c_name, "text") == 0)
+				break;
+		cp->c_private = consoles[i];
+	}
+
+	parent = cp->c_private;
+	parent->c_probe(cp);
 }
 
 static int
-spinc_init(struct console *cp __unused, int arg __unused)
+spinc_init(struct console *cp, int arg)
 {
-	return(0);
+	struct console *parent;
+
+	parent = cp->c_private;
+	return (parent->c_init(cp, arg));
 }
 
 static void
-spinc_putchar(struct console *cp __unused, int c __unused)
+spinc_putchar(struct console *cp, int c __unused)
 {
 	static unsigned tw_chars = 0x5C2D2F7C;    /* "\-/|" */
-	static time_t lasttime;
-	int i;
+	static time_t lasttime = 0;
+	struct console *parent;
 	time_t now;
 
 	now = time(NULL);
 	if (now < (lasttime + 1))
 		return;
 	lasttime = now;
-	for (i = 0; consoles[i] != NULL; i++)
-		if (strcmp(consoles[i]->c_name, "text") == 0)
-			break;
+	parent = cp->c_private;
 
-	consoles[i]->c_out(consoles[i], (char)tw_chars);
-	consoles[i]->c_out(consoles[i], '\b');
+	parent->c_out(parent, (char)tw_chars);
+	parent->c_out(parent, '\b');
 	tw_chars = (tw_chars >> 8) | ((tw_chars & (unsigned long)0xFF) << 24);
 }
 
 static int
 spinc_getchar(struct console *cp __unused)
 {
-	return(-1);
+
+	return (-1);
 }
 
 static int
 spinc_ischar(struct console *cp __unused)
 {
-	return(0);
+
+	return (0);
 }
