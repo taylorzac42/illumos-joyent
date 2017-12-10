@@ -26,7 +26,7 @@
  * Use is subject to license terms.
  *
  * Portions Copyright 2009 Chad Mynhier
- * Copyright 2017 Joyent, Inc.  All rights reserved.
+ * Copyright 2018 Joyent, Inc.  All rights reserved.
  */
 
 #include <sys/types.h>
@@ -87,13 +87,13 @@
 #define	PSINFO_HEADER_PROC_LGRP \
 "   PID USERNAME  SIZE   RSS STATE  PRI NICE      TIME  CPU LGRP PROCESS/NLWP  "
 #define	PSINFO_HEADER_LWP \
-"   PID USERNAME  SIZE   RSS STATE  PRI NICE      TIME  CPU PROCESS/LWPID      "
+"   PID USERNAME  SIZE   RSS STATE  PRI NICE      TIME  CPU PROCESS/LWP        "
 #define	PSINFO_HEADER_LWP_LGRP \
-"   PID USERNAME  SIZE   RSS STATE  PRI NICE      TIME  CPU LGRP PROCESS/LWPID "
+"   PID USERNAME  SIZE   RSS STATE  PRI NICE      TIME  CPU LGRP PROCESS/LWP   "
 #define	USAGE_HEADER_PROC \
 "   PID USERNAME USR SYS TRP TFL DFL LCK SLP LAT VCX ICX SCL SIG PROCESS/NLWP  "
 #define	USAGE_HEADER_LWP \
-"   PID USERNAME USR SYS TRP TFL DFL LCK SLP LAT VCX ICX SCL SIG PROCESS/LWPID "
+"   PID USERNAME USR SYS TRP TFL DFL LCK SLP LAT VCX ICX SCL SIG PROCESS/LWP   "
 #define	USER_HEADER_PROC \
 " NPROC USERNAME  SWAP   RSS MEMORY      TIME  CPU                             "
 #define	USER_HEADER_LWP \
@@ -389,6 +389,7 @@ list_print(list_t *list)
 	char psize[6], prssize[6], pmem[6], pcpu[6], ptime[12];
 	char pstate[7], pnice[4], ppri[4];
 	char pname[LOGNAME_MAX+1];
+	char lwpname[PRLWPNSZ+1];
 	char projname[PROJNAME_MAX+1];
 	char zonename[ZONENAME_MAX+1];
 	float cpu, mem;
