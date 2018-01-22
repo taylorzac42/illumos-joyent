@@ -65,7 +65,7 @@ LIBFICL=	../../libficl/$(MACH)/libficl.a
 SRCS +=	boot.c commands.c console.c devopen.c interp.c
 SRCS +=	interp_backslash.c interp_parse.c ls.c misc.c
 SRCS +=	module.c panic.c linenoise.c multiboot2.c
-SRCS += font.c $(FONT).c list.c tem.c zfs_cmd.c
+SRCS += font.c $(FONT).c tem.c zfs_cmd.c
 
 SRCS +=	load_elf32.c load_elf32_obj.c reloc_elf32.c
 SRCS +=	load_elf64.c load_elf64_obj.c reloc_elf64.c
@@ -167,9 +167,6 @@ install: all $(ROOT_BOOT_DEFAULTS) $(ROOT_BOOT_FORTH) \
 
 %.o:	../../common/linenoise/%.c
 	$(COMPILE.c) -o $@ $<
-
-%.o: $(SRC)/common/list/%.c
-	$(COMPILE.c) -DNDEBUG $<
 
 %.o: $(SRC)/uts/common/font/%.c
 	$(COMPILE.c) $<

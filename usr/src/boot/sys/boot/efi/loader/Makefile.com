@@ -29,11 +29,11 @@ PNGLITE=	$(SRC)/common/pnglite
 # architecture-specific loader code
 SRCS=	autoload.c bootinfo.c conf.c copy.c efi_main.c framebuffer.c main.c \
 	self_reloc.c smbios.c acpi.c vers.c memmap.c multiboot.S multiboot2.c \
-	font.c $(FONT).c list.c tem.c
+	font.c $(FONT).c tem.c
 
 OBJS=	autoload.o bootinfo.o conf.o copy.o efi_main.o framebuffer.o main.o \
 	self_reloc.o smbios.o acpi.o vers.o memmap.o multiboot.o multiboot2.o \
-	font.o $(FONT).o list.o tem.o
+	font.o $(FONT).o tem.o
 
 CFLAGS=	-Os
 CPPFLAGS= -nostdinc -I../../../../../include -I../../..../
@@ -157,9 +157,6 @@ clean clobber:
 
 %.o: ../../../i386/libi386/%.c
 	$(COMPILE.c) $<
-
-%.o: $(SRC)/common/list/%.c
-	$(COMPILE.c) -DNDEBUG $<
 
 %.o: $(SRC)/uts/common/font/%.c
 	$(COMPILE.c) $<

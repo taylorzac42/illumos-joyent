@@ -29,12 +29,20 @@ CFLAGS +=       -fPIC -ffreestanding -msoft-float
 CFLAGS +=       -mno-mmx -mno-3dnow -mno-sse2 -mno-sse3 -mno-sse
 CFLAGS +=       -mno-avx -mno-aes -std=gnu99
 
-SRCS +=		$(SRC)/boot/sys/boot/zfs/zfs.c $(SRC)/boot/sys/boot/zfs/gzip.c
+SRCS +=		$(SRC)/boot/sys/boot/zfs/zfs.c
+SRCS +=		$(SRC)/boot/sys/boot/zfs/gzip.c
 SRCS +=		$(SRC)/common/crypto/edonr/edonr.c
 SRCS +=		$(SRC)/common/crypto/skein/skein.c
 SRCS +=		$(SRC)/common/crypto/skein/skein_iv.c
 SRCS +=		$(SRC)/common/crypto/skein/skein_block.c
-OBJS +=		zfs.o gzip.o edonr.o skein.o skein_iv.o skein_block.o
+SRCS +=		$(SRC)/common/list/list.c
+OBJS +=		zfs.o
+OBJS +=		gzip.o
+OBJS +=		edonr.o
+OBJS +=		skein.o
+OBJS +=		skein_iv.o
+OBJS +=		skein_block.o
+OBJS +=		list.o
 
 CPPFLAGS=	-D_STANDALONE -nostdinc -I../../../../include -I../..
 CPPFLAGS +=	-I../../common -I../../.. -I.. -I.
@@ -71,5 +79,8 @@ libzfsboot.a: $(OBJS)
 
 %.o:	$(SRC)/common/crypto/skein/%.c
 	$(COMPILE.c) -o $@ $<
+
+%.o:	$(SRC)/common/list/%.c
+	$(COMPILE.c) -DNDEBUG $<
 
 zfs.o: $(SRC)/boot/sys/boot/zfs/zfsimpl.c
