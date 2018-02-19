@@ -23,8 +23,6 @@
  * Use is subject to license terms.
  */
 
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
-
 /*
  * References used throughout this code:
  *
@@ -537,6 +535,13 @@ interpret_netbios_names(int flags, uchar_t *data, int len, char *xtra)
 	char  calledname[24];
 	char callingname[24];
 	struct callnames *names = (struct callnames *)data;
+	int i, l;
+
+	l = *data;
+printf("  ");
+for (i = 0; i < l; i++)
+printf("%x ", data[i]);
+printf("\n");
 
 	if (len < sizeof (*names))
 		return;
