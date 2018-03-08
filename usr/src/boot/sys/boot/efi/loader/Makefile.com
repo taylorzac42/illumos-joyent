@@ -28,11 +28,11 @@ PNGLITE=	$(SRC)/common/pnglite
 
 # architecture-specific loader code
 SRCS=	autoload.c bootinfo.c conf.c copy.c efi_main.c framebuffer.c main.c \
-	self_reloc.c smbios.c acpi.c vers.c memmap.c multiboot2.c \
+	self_reloc.c smbios.c acpi.c vers.c memmap.c multiboot.S multiboot2.c \
 	font.c $(FONT).c list.c tem.c
 
 OBJS=	autoload.o bootinfo.o conf.o copy.o efi_main.o framebuffer.o main.o \
-	self_reloc.o smbios.o acpi.o vers.o memmap.o multiboot2.o \
+	self_reloc.o smbios.o acpi.o vers.o memmap.o multiboot.o multiboot2.o \
 	font.o $(FONT).o list.o tem.o
 
 CFLAGS=	-Os
@@ -109,6 +109,7 @@ $(EFIPROG): loader.sym
 		-j .rela.dyn -j .reloc -j .eh_frame -j set_Xcommand_set \
 		-j set_Xficl_compile_set \
 		--output-target=$(EFI_TARGET) --subsystem efi-app loader.sym $@
+	$(BTXLD) -V $(BOOT_VERSION) -o $@ $@
 
 LIBEFI=		../../libefi/$(MACHINE)/libefi.a
 LIBCRYPTO=	../../../libcrypto/$(MACHINE)/libcrypto.a
@@ -144,6 +145,9 @@ clean clobber:
 #
 %.o:	../arch/$(MACHINE)/%.S
 	$(COMPILE.S) -Wa,-W $<
+
+%.o:	../../../common/%.S
+	$(COMPILE.S) $<
 
 %.o:	../../../common/%.c
 	$(COMPILE.c) $<
