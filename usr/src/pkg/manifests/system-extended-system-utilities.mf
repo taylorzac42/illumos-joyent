@@ -107,6 +107,7 @@ file path=usr/bin/diff mode=0555
 file path=usr/bin/diff3 mode=0555
 file path=usr/bin/dircmp mode=0555
 file path=usr/bin/dos2unix mode=0555
+file path=usr/bin/etdump mode=0555
 file path=usr/bin/expand mode=0555
 file path=usr/bin/factor mode=0555
 file path=usr/bin/kstat mode=0555

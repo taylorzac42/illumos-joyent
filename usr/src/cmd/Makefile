@@ -152,6 +152,7 @@ COMMON_SUBDIRS=		\
 	enhance		\
 	env		\
 	eqn		\
+	etdump		\
 	expand		\
 	expr		\
 	exstr		\
