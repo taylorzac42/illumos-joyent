@@ -23,6 +23,7 @@
  * Copyright (c) 2012, 2016 by Delphix. All rights reserved.
  * Copyright 2016 Nexenta Systems, Inc.  All rights reserved.
  * Copyright (c) 2013 Joyent, Inc.  All rights reserved.
+ * Copyright 2018 OmniOS Community Edition (OmniOSce) Association.
  */
 
 #include <sys/zfs_context.h>
@@ -332,10 +333,8 @@ vdev_disk_open(vdev_t *vd, uint64_t *psize, uint64_t *max_psize,
 	if (vd->vdev_devid != NULL) {
 		if (ddi_devid_str_decode(vd->vdev_devid, &dvd->vd_devid,
 		    &dvd->vd_minor) != 0) {
-			vd->vdev_stat.vs_aux = VDEV_AUX_BAD_LABEL;
 			vdev_dbgmsg(vd, "vdev_disk_open: invalid "
 			    "vdev_devid '%s'", vd->vdev_devid);
-			return (SET_ERROR(EINVAL));
 		}
 	}
 
@@ -372,7 +371,7 @@ vdev_disk_open(vdev_t *vd, uint64_t *psize, uint64_t *max_psize,
 		/*
 		 * Compare the devid to the stored value.
 		 */
-		if (error == 0 && vd->vdev_devid != NULL &&
+		if (error == 0 && dvd->vd_devid != NULL &&
 		    ldi_get_devid(dvd->vd_lh, &devid) == 0) {
 			if (ddi_devid_compare(devid, dvd->vd_devid) != 0) {
 				error = SET_ERROR(EINVAL);
