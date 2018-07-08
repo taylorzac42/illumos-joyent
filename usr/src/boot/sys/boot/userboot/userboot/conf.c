@@ -1,4 +1,4 @@
-/*-
+/*
  * Copyright (c) 1997
  *	Matthias Drochner.  All rights reserved.
  *
@@ -32,15 +32,11 @@
  */
 
 #include <sys/cdefs.h>
-__FBSDID("$FreeBSD$");
 
 #include <stand.h>
 
 #include "libuserboot.h"
-
-#if defined(USERBOOT_ZFS_SUPPORT)
-#include "../zfs/libzfs.h"
-#endif
+#include "libzfs.h"
 
 /*
  * We could use linker sets for some or all of these, but
@@ -55,9 +51,7 @@ __FBSDID("$FreeBSD$");
 struct devsw *devsw[] = {
 	&host_dev,
 	&userboot_disk,
-#if defined(USERBOOT_ZFS_SUPPORT)
 	&zfs_dev,
-#endif
 	NULL
 };
 
@@ -65,9 +59,7 @@ struct fs_ops *file_system[] = {
 	&host_fsops,
 	&ufs_fsops,
 	&cd9660_fsops,
-#if defined(USERBOOT_ZFS_SUPPORT)
 	&zfs_fsops,
-#endif
 	&gzipfs_fsops,
 	&bzipfs_fsops,
 	NULL

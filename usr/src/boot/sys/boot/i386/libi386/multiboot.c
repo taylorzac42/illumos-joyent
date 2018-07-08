@@ -1,4 +1,4 @@
-/*-
+/*
  * Copyright (c) 2014 Roger Pau Monné <royger@FreeBSD.org>
  * All rights reserved.
  *
@@ -51,7 +51,7 @@
 #include "bootstrap.h"
 #include <sys/multiboot.h>
 #include "vbe.h"
-#include "../../zfs/libzfs.h"
+#include "libzfs.h"
 #include "libi386.h"
 #include "../btx/lib/btxv86.h"
 
