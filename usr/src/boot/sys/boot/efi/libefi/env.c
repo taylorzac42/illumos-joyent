@@ -914,7 +914,9 @@ command_efi_set(int argc, char *argv[])
 	char *uuid, *var, *val;
 	CHAR16 wvar[128];
 	EFI_GUID guid;
+#if 0
 	EFI_STATUS err;
+#endif
 
 	if (argc != 4) {
 		printf("efi-set uuid var new-value\n");
@@ -951,7 +953,9 @@ command_efi_unset(int argc, char *argv[])
 	char *uuid, *var;
 	CHAR16 wvar[128];
 	EFI_GUID guid;
+#if 0
 	EFI_STATUS err;
+#endif
 
 	if (argc != 3) {
 		printf("efi-unset uuid var\n");
