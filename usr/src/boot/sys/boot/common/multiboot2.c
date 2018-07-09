@@ -75,6 +75,17 @@ static bool have_framebuffer = false;
 static vm_offset_t load_addr;
 static vm_offset_t entry_addr;
 
+COMMAND_SET(keepbs, "toggle-bs", "toggle UEFI BS", command_keepbs);
+
+static int
+command_keepbs(int argc __unused, char *argv[] __unused)
+{
+
+	keep_bs = !keep_bs;
+
+	printf("UEFI BS is %s\n", keep_bs? "on" : "off");
+	return (CMD_OK);
+}
 /*
  * Validate tags in info request. This function is provided just to
  * recognize the current tag list and only serves as a limited
@@ -1197,7 +1208,7 @@ multiboot2_exec(struct preloaded_file *fp)
 		if (map->PhysicalStart == 0)
 			panic("Could not find memory for relocater\n");
 
-		if (keep_bs == 0) {
+		if (keep_bs == false) {
 			status = BS->ExitBootServices(IH, key);
 			if (EFI_ERROR(status)) {
 				printf("Call to ExitBootServices failed\n");
