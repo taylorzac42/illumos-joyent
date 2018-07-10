@@ -244,6 +244,7 @@ biospnp_scanresdata(struct pnpinfo *pi, struct pnp_devNode *dn)
  * Arguments to the BIOS functions must be packed on the stack, hence
  * this evil.
  */
+#pragma GCC diagnostic ignored "-Wstrict-aliasing"
 static int
 biospnp_call(int func, const char *fmt, ...)
 {

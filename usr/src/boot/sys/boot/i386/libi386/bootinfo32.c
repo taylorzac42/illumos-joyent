@@ -130,6 +130,7 @@ bi_copymodules32(vm_offset_t addr)
  * - The kernel environment is copied into kernel space.
  * - Module metadata are formatted and placed in kernel space.
  */
+#pragma GCC diagnostic ignored "-Wstrict-aliasing"
 int
 bi_load32(char *args, int *howtop, int *bootdevp, vm_offset_t *bip, vm_offset_t *modulep, vm_offset_t *kernendp)
 {
