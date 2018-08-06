@@ -23,6 +23,7 @@
 #include <sys/disk.h>
 #include <sys/reboot.h>
 #include <sys/queue.h>
+#include <sys/stddef.h>
 #include <sys/multiboot.h>
 
 #include <machine/bootinfo.h>
@@ -30,7 +31,6 @@
 #include <machine/pc/bios.h>
 
 #include <stdarg.h>
-#include <stddef.h>
 
 #include <a.out.h>
 #include "bootstrap.h"

@@ -29,9 +29,9 @@
 #include <sys/cdefs.h>
 
 #include <stand.h>
-#include <stddef.h>
 #include <string.h>
 #include <stdarg.h>
+#include <sys/stddef.h>
 #include <sys/param.h>
 
 #include <net/ethernet.h>

@@ -59,7 +59,7 @@
 #include <netinet/in_systm.h>
 
 #include <stand.h>
-#include <stddef.h>
+#include <sys/stddef.h>
 #include <string.h>
 #include <net.h>
 #include <netif.h>

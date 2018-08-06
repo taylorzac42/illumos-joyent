@@ -32,7 +32,7 @@
  */
 
 #include <stand.h>
-#include <stddef.h>
+#include <sys/stddef.h>
 #include <string.h>
 #include <machine/bootinfo.h>
 #include <machine/cpufunc.h>

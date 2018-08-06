@@ -39,5 +39,6 @@ typedef	__ptrdiff_t	ptrdiff_t;
 #endif
 
 #define	offsetof(type, field)	__offsetof(type, field)
+#define	container_of(m, s, n)	__containerof(m, s, n)
 
 #endif /* !_SYS_STDDEF_H_ */

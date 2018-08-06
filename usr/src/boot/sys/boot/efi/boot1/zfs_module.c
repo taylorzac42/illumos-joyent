@@ -23,11 +23,11 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-#include <stddef.h>
 #include <stdarg.h>
 #include <stdbool.h>
 #include <sys/cdefs.h>
 #include <sys/param.h>
+#include <sys/stddef.h>
 #include <sys/queue.h>
 #include <efi.h>
 

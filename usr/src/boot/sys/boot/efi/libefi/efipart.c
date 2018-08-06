@@ -30,7 +30,7 @@
 #include <sys/param.h>
 #include <sys/time.h>
 #include <sys/queue.h>
-#include <stddef.h>
+#include <sys/stddef.h>
 #include <stdarg.h>
 
 #include <bootstrap.h>

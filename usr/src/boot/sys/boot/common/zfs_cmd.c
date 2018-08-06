@@ -32,7 +32,7 @@
  */
 
 #include <stand.h>
-#include <stddef.h>
+#include <sys/stddef.h>
 #include <sys/disk.h>
 #include <sys/reboot.h>
 
