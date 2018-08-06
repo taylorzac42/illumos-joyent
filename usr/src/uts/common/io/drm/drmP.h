@@ -57,9 +57,9 @@
 #include <sys/agpgart.h>
 #include <sys/time.h>
 #include <sys/sysmacros.h>
+#include <sys/queue.h>
 #include "drm_atomic.h"
 #include "drm.h"
-#include "queue.h"
 #include "drm_linux_list.h"
 
 #ifndef __inline__
