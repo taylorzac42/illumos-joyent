@@ -241,7 +241,6 @@ ecore_dcbx_update_app_info(struct ecore_dcbx_results *p_data,
 {
 	enum ecore_pci_personality personality;
 	enum dcbx_protocol_type id;
-	char *name;
 	int i;
 
 	for (i = 0; i < OSAL_ARRAY_SIZE(ecore_dcbx_app_update); i++) {
@@ -251,8 +250,6 @@ ecore_dcbx_update_app_info(struct ecore_dcbx_results *p_data,
 			continue;
 
 		personality = ecore_dcbx_app_update[i].personality;
-		name = ecore_dcbx_app_update[i].name;
-
 		ecore_dcbx_set_params(p_data, p_hwfn, enable,
 				      prio, tc, type, personality);
 	}
@@ -999,8 +996,6 @@ ecore_dcbx_mib_update_event(struct ecore_hwfn *p_hwfn, struct ecore_ptt *p_ptt,
 
 		rc = ecore_dcbx_process_mib_info(p_hwfn);
 		if (!rc) {
-			bool enabled;
-
 			/* reconfigure tcs of QM queues according
 			 * to negotiation results
 			 */
@@ -1008,11 +1003,6 @@ ecore_dcbx_mib_update_event(struct ecore_hwfn *p_hwfn, struct ecore_ptt *p_ptt,
 
 			/* update storm FW with negotiation results */
 			ecore_sp_pf_update_dcbx(p_hwfn);
-
-			/* set eagle enigne 1 flow control workaround
-			 * according to negotiation results
-			 */
-			enabled = p_hwfn->p_dcbx_info->results.dcbx_enabled;
 
 #ifdef CONFIG_ECORE_ROCE
 			/* for roce PFs, we may want to enable/disable DPM

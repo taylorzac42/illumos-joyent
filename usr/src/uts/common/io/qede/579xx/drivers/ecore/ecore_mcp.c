@@ -362,7 +362,7 @@ static enum _ecore_status_t ecore_do_mcp_cmd(struct ecore_hwfn *p_hwfn,
 {
 	u32 delay = CHIP_MCP_RESP_ITER_US;
 	u32 max_retries = ECORE_DRV_MB_MAX_RETRIES;
-	u32 seq, cnt = 1, actual_mb_seq;
+	u32 seq, cnt = 1;
 	enum _ecore_status_t rc = ECORE_SUCCESS;
 
 #ifndef ASIC_ONLY
@@ -372,10 +372,6 @@ static enum _ecore_status_t ecore_do_mcp_cmd(struct ecore_hwfn *p_hwfn,
 	if (CHIP_REV_IS_FPGA(p_hwfn->p_dev))
 		max_retries /= 10;
 #endif
-
-	/* Get actual driver mailbox sequence */
-	actual_mb_seq = DRV_MB_RD(p_hwfn, p_ptt, drv_mb_header) &
-			DRV_MSG_SEQ_NUMBER_MASK;
 
 	/* Use MCP history register to check if MCP reset occurred between
 	 * init time and now.
@@ -1433,7 +1429,7 @@ static void ecore_mcp_send_protocol_stats(struct ecore_hwfn *p_hwfn,
 					  struct ecore_ptt *p_ptt,
 					  enum MFW_DRV_MSG_TYPE type)
 {
-	enum ecore_mcp_protocol_type stats_type;
+	enum ecore_mcp_protocol_type stats_type __unused;
 	union ecore_mcp_protocol_stats stats;
 	struct ecore_mcp_mb_params mb_params;
 	u32 hsi_param;
@@ -3128,7 +3124,6 @@ enum _ecore_status_t ecore_mcp_phy_sfp_read(struct ecore_hwfn *p_hwfn,
 					    u32 len, u8 *p_buf)
 {
 	struct ecore_mcp_nvm_params params;
-	enum _ecore_status_t rc;
 	u32 bytes_left, bytes_to_copy, buf_size;
 
 	OSAL_MEMSET(&params, 0, sizeof(struct ecore_mcp_nvm_params));
@@ -3153,7 +3148,7 @@ enum _ecore_status_t ecore_mcp_phy_sfp_read(struct ecore_hwfn *p_hwfn,
 			 DRV_MB_PARAM_TRANSCEIVER_OFFSET_SHIFT);
 		params.nvm_common.offset |=
 			(bytes_to_copy << DRV_MB_PARAM_TRANSCEIVER_SIZE_SHIFT);
-		rc = ecore_mcp_nvm_command(p_hwfn, p_ptt, &params);
+		ecore_mcp_nvm_command(p_hwfn, p_ptt, &params);
 		if ((params.nvm_common.resp & FW_MSG_CODE_MASK) ==
 		    FW_MSG_CODE_TRANSCEIVER_NOT_PRESENT) {
 			return ECORE_NODEV;
@@ -3174,7 +3169,6 @@ enum _ecore_status_t ecore_mcp_phy_sfp_write(struct ecore_hwfn *p_hwfn,
 					     u32 len, u8 *p_buf)
 {
 	struct ecore_mcp_nvm_params params;
-	enum _ecore_status_t rc;
 	u32 buf_idx, buf_size;
 
 	OSAL_MEMSET(&params, 0, sizeof(struct ecore_mcp_nvm_params));
@@ -3197,7 +3191,7 @@ enum _ecore_status_t ecore_mcp_phy_sfp_write(struct ecore_hwfn *p_hwfn,
 			(buf_size << DRV_MB_PARAM_TRANSCEIVER_SIZE_SHIFT);
 		params.nvm_wr.buf_size = buf_size;
 		params.nvm_wr.buf = (u32 *)&p_buf[buf_idx];
-		rc = ecore_mcp_nvm_command(p_hwfn, p_ptt, &params);
+		ecore_mcp_nvm_command(p_hwfn, p_ptt, &params);
 		if ((params.nvm_common.resp & FW_MSG_CODE_MASK) ==
 		    FW_MSG_CODE_TRANSCEIVER_NOT_PRESENT) {
 			return ECORE_NODEV;

@@ -626,7 +626,7 @@ static int ecore_ah_e5_phy_mac_stat(struct ecore_hwfn *p_hwfn,
 				    struct ecore_ptt *p_ptt, u32 port,
 				    char *p_phy_result_buf)
 {
-	u32 length, reg_id, addr, data_hi, data_lo;
+	u32 length, reg_id, addr, data_lo;
 
 	length = OSAL_SPRINTF(p_phy_result_buf,
 			       "MAC stats for port %d (only non-zero)\n", port);
@@ -637,10 +637,6 @@ static int ecore_ah_e5_phy_mac_stat(struct ecore_hwfn *p_hwfn,
 				   NWM_REG_MAC0_K2_E5 +
 				   NWM_REG_MAC0_SIZE * 4 * port +
 				   addr);
-		data_hi = ecore_rd(p_hwfn, p_ptt,
-				   NWM_REG_MAC0_K2_E5 +
-				   NWM_REG_MAC0_SIZE * 4 * port +
-				   addr + 4);
 
 		if (data_lo) {  /* Only non-zero */
 			length += OSAL_SPRINTF(&p_phy_result_buf[length],
