@@ -354,12 +354,41 @@ stripfname(char *buf)
 }
 
 void
-format_lwpname(lwpsinfo_t *lwpi, char *buf, size_t buflen)
+format_name(const char *pname, const char *lwpname, int lwpid, char *buf,
+    size_t buflen, size_t width, int do_trunc)
 {
-	if (lwpi->pr_lwpname[0] == '\0') {
-		(void) snprintf(buf, buflen, "%d", lwpi->pr_lwpid);
+	char *cp;
+	wchar_t wchar;
+	int n, len, size = 0;
+
+	if (lwpname == NULL || lwpname[0] == '\0') {
+		n = snprintf(buf, buflen, "%s/%d", pname, lwpid);
 	} else {
-		(void) strlcpy(buf, lwpi->pr_lwpname,
-		    MIN(buflen, sizeof (lwpi->pr_lwpname)));
+		n = snprintf(buf, buflen, "%s/%s", pname, lwpname);
+	}
+
+	do_trunc = (do_trunc > 0) ? 1 : 0;
+
+	for (cp = buf; *cp != '\0'; cp += len, size++) {
+		len = mbtowc(&wchar, cp, MB_LEN_MAX);
+		if (len <= 0) {
+			*cp = '\0';
+			break;
+		}
+		if (width > 0 && size + 1 + do_trunc > width) {
+			if (do_trunc)
+				*cp++ = '*';
+			*cp = '\0';
+			break;
+		}
+		if (!iswprint(wchar)) {
+			int remain = n - (int)(cp - buf);
+			if (remain + len >= n) {
+				/* last character */
+				*cp = '\0';
+				break;
+			}
+			(void) memmove(cp, cp + len, remain - len);
+		}
 	}
 }

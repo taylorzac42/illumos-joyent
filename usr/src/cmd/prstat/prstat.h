@@ -26,7 +26,7 @@
  * Use is subject to license terms.
  *
  * Portions Copyright 2009 Chad Mynhier
- * Copyright 2017 Joyent, Inc.  All rights reserved.
+ * Copyright 2018 Joyent, Inc.  All rights reserved.
  */
 
 #ifndef	_PRSTAT_H
@@ -169,6 +169,7 @@ typedef	struct optdesc {
 	int		o_count;	/* number of iterations */
 	int		o_outpmode;	/* selected output mode */
 	int		o_sortorder;	/* +1 ascending, -1 descending */
+	int		o_cols;		/* number of columns */
 } optdesc_t;
 
 #ifdef	__cplusplus
