@@ -21,7 +21,7 @@
 
 /*
  * Copyright (c) 2003, 2010, Oracle and/or its affiliates. All rights reserved.
- * Copyright (c) 2017, Joyent, Inc.
+ * Copyright (c) 2018, Joyent, Inc.
  * Copyright (c) 2012, 2016 by Delphix. All rights reserved.
  */
 
@@ -404,6 +404,8 @@ static const dt_ident_t _dtrace_globals[] = {
 	&dt_idops_func, "void(@, ...)" },
 { "this", DT_IDENT_PTR, 0, 0, DT_ATTR_STABCMN, DT_VERS_1_0,
 	&dt_idops_type, "void" },
+{ "threadname", DT_IDENT_SCALAR, 0, DIF_VAR_THREADNAME,
+	DT_ATTR_STABCMN, DT_VERS_1_14, &dt_idops_type, "string" },
 { "tid", DT_IDENT_SCALAR, 0, DIF_VAR_TID, DT_ATTR_STABCMN, DT_VERS_1_0,
 	&dt_idops_type, "id_t" },
 { "timestamp", DT_IDENT_SCALAR, 0, DIF_VAR_TIMESTAMP,
@@ -439,8 +441,6 @@ static const dt_ident_t _dtrace_globals[] = {
 	&dt_idops_type, "uint32_t" },
 { "usym", DT_IDENT_ACTFUNC, 0, DT_ACT_USYM, DT_ATTR_STABCMN,
 	DT_VERS_1_2, &dt_idops_func, "_usymaddr(uintptr_t)" },
-{ "uthreadname", DT_IDENT_SCALAR, 0, DIF_VAR_UTHREADNAME,
-	DT_ATTR_STABCMN, DT_VERS_1_14, &dt_idops_type, "string" },
 { "vmregs", DT_IDENT_ARRAY, 0, DIF_VAR_VMREGS, DT_ATTR_STABCMN, DT_VERS_1_7,
 	&dt_idops_regs, NULL },
 { "vtimestamp", DT_IDENT_SCALAR, 0, DIF_VAR_VTIMESTAMP,
