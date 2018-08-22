@@ -27,7 +27,7 @@
  */
 
 /*
- * Copyright (c) 2017, Joyent, Inc.
+ * Copyright (c) 2018, Joyent, Inc.
  */
 
 /*	Copyright (c) 1984, 1986, 1987, 1988, 1989 AT&T	*/
@@ -1765,6 +1765,9 @@ print_field(psinfo_t *psinfo, struct field *f, const char *ttyp)
 		break;
 	case F_LWP:
 		(void) printf("%*d", width, (int)psinfo->pr_lwp.pr_lwpid);
+		break;
+	case F_LWPNAME:
+		(void) printf("%*s", width, psinfo->pr_lwp.pr_lwpname);
 		break;
 	case F_NLWP:
 		(void) printf("%*d", width, psinfo->pr_nlwp + psinfo->pr_nzomb);
