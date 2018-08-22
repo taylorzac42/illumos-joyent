@@ -2375,3 +2375,24 @@ thread_setname(kthread_t *t, const char *name)
 	}
 	mutex_exit(&ttoproc(t)->p_lock);
 }
+
+int
+thread_vsetname(kthread_t *t, const char *fmt, ...)
+{
+	char name[THREAD_NAME_MAX];
+	va_list va;
+	int rc;
+
+	va_start(va, fmt);
+	rc = vsnprintf(name, sizeof (name), fmt, va);
+	va_end(va);
+
+	if (rc < 0)
+		return (EINVAL);
+
+	if (rc >= sizeof (name))
+		return (ENAMETOOLONG);
+
+	thread_setname(t, name);
+	return (0);
+}
