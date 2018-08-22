@@ -2422,7 +2422,8 @@ pthread_setname_np(pthread_t tid, const char *name)
 	int fd;
 
 	if (name == NULL)
-		return (EINVAL);
+		name = "";
+
 	if (strlen(name) + 1 > THR_NAME_MAX)
 		return (ERANGE);
 
