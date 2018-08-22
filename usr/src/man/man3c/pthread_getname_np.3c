@@ -9,9 +9,9 @@
 .\" http://www.illumos.org/license/CDDL.
 .\"
 .\"
-.\" Copyright 2017 Joyent, Inc.
+.\" Copyright 2018 Joyent, Inc.
 .\"
-.Dd "May 18, 2017"
+.Dd "August 22, 2018"
 .Dt PTHREAD_GETNAME_NP 3C
 .Os
 .Sh NAME
@@ -48,11 +48,14 @@ For
 .Fa len
 indicates the size of
 .Fa name .
-Thread names are limited to XX characters.
+Thread names are limited to 31 characters, so a buffer of 32 is sufficient to
+hold any thread name.
 To clear a thread name, call
 .Fn pthread_setname_np
 with
 .Sy NULL .
+.Pp
+Unlike some other systems, threads do not inherit the process name by default.
 .Sh RETURN VALUES
 Upon successful completion, the
 .Fn pthread_getname_np
@@ -67,7 +70,8 @@ does not have a name set,
 .Fa pthread_getname_np
 will be set to an empty string (length = 0).
 .Sh ERRORS
-The
+Errors from \fBopen\fR(2), \fBpread\fR(2), or \fBpwrite\fR(2) are possible.
+In addition, the
 .Fn pthread_getname_np
 function will fail with:
 .Bl -tag -width Er

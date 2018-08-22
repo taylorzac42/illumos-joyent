@@ -63,7 +63,7 @@ and
 .Fn pthread_attr_setname_np
 functions return
 .Sy 0 .
-Otherwise, and error number is returned to indicate the error.
+Otherwise, an error number is returned to indicate the error.
 .Sh ERRORS
 The
 .Fn pthread_attr_getname_np

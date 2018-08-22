@@ -1,11 +1,11 @@
 '\" te
 .\" Copyright 1989 AT&T
 .\" Copyright (c) 2006, Sun Microsystems, Inc. All Rights Reserved.
-.\" Copyright 2017, Joyent, Inc.
+.\" Copyright 2018, Joyent, Inc.
 .\" The contents of this file are subject to the terms of the Common Development and Distribution License (the "License").  You may not use this file except in compliance with the License.
 .\" You can obtain a copy of the license at usr/src/OPENSOLARIS.LICENSE or http://www.opensolaris.org/os/licensing.  See the License for the specific language governing permissions and limitations under the License.
 .\" When distributing Covered Code, include this CDDL HEADER in each file and include the License file at usr/src/OPENSOLARIS.LICENSE.  If applicable, add the following below this CDDL HEADER, with the fields enclosed by brackets "[]" replaced with your own identifying information: Portions Copyright [yyyy] [name of copyright owner]
-.Dd Jun 24, 2016
+.Dd "August 22, 2018"
 .Dt PROC 4
 .Os
 .Sh NAME
@@ -982,12 +982,12 @@ typedef struct psinfo {
     uintptr_t pr_argv;       /* address of initial argument vector */
     uintptr_t pr_envp;       /* address of initial environment vector */
     char pr_dmodel;          /* data model of the process */
-    lwpsinfo_t pr_lwp;       /* information for representative lwp */
     taskid_t pr_taskid;      /* task id */
     projid_t pr_projid;      /* project id */
     poolid_t pr_poolid;      /* pool id */
     zoneid_t pr_zoneid;      /* zone id */
     ctid_t pr_contract;      /* process contract id */
+    lwpsinfo_t pr_lwp;       /* information for representative lwp */
 } psinfo_t;
 .Ed
 .Pp
@@ -1049,27 +1049,28 @@ are zero and the other fields of
 are undefined:
 .Bd -literal -offset 2
 typedef struct lwpsinfo {
-    int pr_flag;             /* lwp flags (DEPRECATED: see below) */
-    id_t pr_lwpid;           /* lwp id */
-    uintptr_t pr_addr;       /* internal address of lwp */
-    uintptr_t pr_wchan;      /* wait addr for sleeping lwp */
-    char pr_stype;           /* synchronization event type */
-    char pr_state;           /* numeric lwp state */
-    char pr_sname;           /* printable character for pr_state */
-    char pr_nice;            /* nice for cpu usage */
-    short pr_syscall;        /* system call number (if in syscall) */
-    char pr_oldpri;          /* pre-SVR4, low value is high priority */
-    char pr_cpu;             /* pre-SVR4, cpu usage for scheduling */
-    int pr_pri;              /* priority, high value = high priority */
-    ushort_t pr_pctcpu;      /* % of recent cpu time used by this lwp */
-    timestruc_t pr_start;    /* lwp start time, from the epoch */
-    timestruc_t pr_time;     /* cpu time for this lwp */
-    char pr_clname[PRCLSZ];  /* scheduling class name */
-    char pr_name[PRFNSZ];    /* name of system lwp */
-    processorid_t pr_onpro;  /* processor which last ran this lwp */
-    processorid_t pr_bindpro;/* processor to which lwp is bound */
-    psetid_t pr_bindpset;    /* processor set to which lwp is bound */
-    lgrp_id_t pr_lgrp	      /* home lgroup */
+    int pr_flag;               /* lwp flags (DEPRECATED: see below) */
+    id_t pr_lwpid;             /* lwp id */
+    uintptr_t pr_addr;         /* internal address of lwp */
+    uintptr_t pr_wchan;        /* wait addr for sleeping lwp */
+    char pr_stype;             /* synchronization event type */
+    char pr_state;             /* numeric lwp state */
+    char pr_sname;             /* printable character for pr_state */
+    char pr_nice;              /* nice for cpu usage */
+    short pr_syscall;          /* system call number (if in syscall) */
+    char pr_oldpri;            /* pre-SVR4, low value is high priority */
+    char pr_cpu;               /* pre-SVR4, cpu usage for scheduling */
+    int pr_pri;                /* priority, high value = high priority */
+    ushort_t pr_pctcpu;        /* % of recent cpu time used by this lwp */
+    timestruc_t pr_start;      /* lwp start time, from the epoch */
+    timestruc_t pr_time;       /* cpu time for this lwp */
+    char pr_clname[PRCLSZ];    /* scheduling class name */
+    char pr_name[PRFNSZ];      /* name of system lwp */
+    processorid_t pr_onpro;    /* processor which last ran this lwp */
+    processorid_t pr_bindpro;  /* processor to which lwp is bound */
+    psetid_t pr_bindpset;      /* processor set to which lwp is bound */
+    lgrp_id_t pr_lgrp          /* home lgroup */
+    char pr_lwpname[PRLWPNSZ]; /* lwp name */
 } lwpsinfo_t;
 .Ed
 .Pp
@@ -1103,6 +1104,13 @@ See
 .Xr contract 4
 and
 .Xr process 4 .
+.Pp
+.Sy pr_lwpname
+contains the name of thread, or the empty string if not set.
+This field is not present in older operating system versions.
+The similar-sounding
+.Sy pr_name
+is not used and should be ignored.
 .Ss cred
 Contains a description of the credentials associated with the process:
 .Bd -literal -offset 2
