@@ -25,7 +25,7 @@
  */
 
 /*
- * Copyright 2017, Joyent, Inc.
+ * Copyright 2018, Joyent, Inc.
  */
 
 #include "lint.h"
@@ -492,8 +492,11 @@ pthread_attr_setname_np(pthread_attr_t *attr, const char *name)
 	 */
 	(void) memset(ap->name, 0, sizeof (ap->name));
 
-	if (name != NULL)
-		(void) strlcpy(ap->name, name, sizeof (ap->name));
+	if (name == NULL)
+		return (0);
+
+	if (strlcpy(ap->name, name, sizeof (ap->name)) >= sizeof (ap->name))
+		return (ERANGE);
 
 	return (0);
 }
@@ -503,10 +506,12 @@ pthread_attr_getname_np(pthread_attr_t *attr, char *buf, size_t len)
 {
 	thrattr_t *ap;
 
-	if (attr == NULL || (ap = attr->__pthread_attrp) == NULL)
+	if (buf == NULL || attr == NULL ||
+	    (ap = attr->__pthread_attrp) == NULL)
 		return (EINVAL);
 
-	(void) strlcpy(buf, ap->name, len);
+	if (strlcpy(buf, ap->name, len) > len)
+		return (ERANGE);
 	return (0);
 }
 

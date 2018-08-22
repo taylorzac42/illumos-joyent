@@ -25,7 +25,7 @@
  * Copyright (c) 2017 by The MathWorks, Inc. All rights reserved.
  */
 /*
- * Copyright 2017 Joyent, Inc.
+ * Copyright 2018 Joyent, Inc.
  */
 
 #include "lint.h"
@@ -2433,13 +2433,20 @@ pthread_setname_np(pthread_t tid, const char *name)
 	ultos((uint64_t)tid, 10, buf + strlen(buf));
 	(void) strlcat(buf, "/lwpsinfo", sizeof (buf));
 
-	if ((fd = __open(buf, O_WRONLY, 0)) < 0)
-		return (-1);
+	if ((fd = __open(buf, O_WRONLY, 0)) < 0) {
+		if (errno == ENOENT)
+			errno = ESRCH;
+		return (errno);
+	}
 
 	n = __pwrite(fd, namebuf, sizeof (namebuf), offset);
 	(void) __close(fd);
 
-	return ((n > 0) ? 0 : -1);
+	if (n != sizeof (namebuf))
+		return (EFAULT);
+	else if (n < 0)
+		return (errno);
+	return (0);
 }
 
 int
@@ -2462,15 +2469,15 @@ pthread_getname_np(pthread_t tid, char *name, size_t len)
 
 	if ((fd = __open(buf, O_RDONLY, 0)) < 0) {
 		if (errno == ENOENT)
-			return (ESRCH);
-		return (-1);
+			errno = ESRCH;
+		return (errno);
 	}
 
 	n = __pread(fd, namebuf, sizeof (namebuf), offset);
 	(void) __close(fd);
 
 	if (n != sizeof (namebuf))
-		return (-1);
+		return (EFAULT);
 
 	if (namebuf[THR_NAME_MAX - 1] != '\0')
 		namebuf[THR_NAME_MAX - 1] = '\0';
