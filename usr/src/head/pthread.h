@@ -21,7 +21,7 @@
 
 /*
  * Copyright 2014 Garrett D'Amore <garrett@damore.org>
- * Copyright 2017 Joyent, Inc.
+ * Copyright 2018 Joyent, Inc.
  *
  * Copyright 2008 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -138,6 +138,9 @@ extern "C" {
 
 /* barriers */
 #define	PTHREAD_BARRIER_SERIAL_THREAD	-2
+
+/* For pthread_{get,set}name_np(). */
+#define	PTHREAD_MAX_NAMELEN_NP (32)
 
 #ifndef	_ASM
 

@@ -9,9 +9,9 @@
 .\" http://www.illumos.org/license/CDDL.
 .\"
 .\"
-.\" Copyright 2017 Joyent, Inc.
+.\" Copyright 2018 Joyent, Inc.
 .\"
-.Dd May 18, 2017
+.Dd "August 22, 2018"
 .Dt PTHREAD_ATTR_GETNAME_NP 3C
 .Os
 .Sh NAME
@@ -55,7 +55,8 @@ using
 will have their name set to
 .Fa name
 upon creation.
-Thread names are limited to XX characters.
+Thread names are limited to PTHREAD_MAX_NAMELEN_NP including the terminating
+NIL.
 .Sh RETURN VALUES
 Upon successful completion, the
 .Fn pthread_attr_getname_np

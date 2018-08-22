@@ -48,8 +48,10 @@ For
 .Fa len
 indicates the size of
 .Fa name .
-Thread names are limited to 31 characters, so a buffer of 32 is sufficient to
-hold any thread name.
+.Pp
+Thread names are limited to PTHREAD_MAX_NAMELEN_NP including the terminating
+NIL.
+.Pp
 To clear a thread name, call
 .Fn pthread_setname_np
 with
