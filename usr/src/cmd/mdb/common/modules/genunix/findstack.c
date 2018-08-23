@@ -22,6 +22,7 @@
 /*
  * Copyright (c) 1999, 2010, Oracle and/or its affiliates. All rights reserved.
  * Copyright (c) 2013, Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+ * Copyright 2018 Joyent, Inc.
  */
 
 #include <mdb/mdb_modapi.h>
@@ -40,6 +41,8 @@
 
 int findstack_debug_on = 0;
 
+#ifdef _KERNEL
+
 /*
  * "sp" is a kernel VA.
  */
@@ -48,6 +51,7 @@ print_stack(uintptr_t sp, uintptr_t pc, uintptr_t addr,
     int argc, const mdb_arg_t *argv, int free_state)
 {
 	int showargs = 0, count, err;
+	char tdesc[128] = "";
 
 	count = mdb_getopts(argc, argv,
 	    'v', MDB_OPT_SETBITS, TRUE, &showargs, NULL);
@@ -57,8 +61,10 @@ print_stack(uintptr_t sp, uintptr_t pc, uintptr_t addr,
 	if (argc > 1 || (argc == 1 && argv->a_type != MDB_TYPE_STRING))
 		return (DCMD_USAGE);
 
-	mdb_printf("stack pointer for thread %p%s: %p\n",
-	    addr, (free_state ? " (TS_FREE)" : ""), sp);
+	(void) thread_getdesc(addr, B_TRUE, tdesc, sizeof (tdesc));
+
+	mdb_printf("stack pointer for thread %p%s (%s): %p\n",
+	    addr, (free_state ? " (TS_FREE)" : ""), tdesc, sp);
 	if (pc != 0)
 		mdb_printf("[ %0?lr %a() ]\n", sp, pc);
 
@@ -95,6 +101,8 @@ findstack(uintptr_t addr, uint_t flags, int argc, const mdb_arg_t *argv)
 	return (print_stack(fsi.fsi_sp, fsi.fsi_pc, addr,
 	    argc, argv, fsi.fsi_tstate == TS_FREE));
 }
+
+#endif
 
 /*ARGSUSED*/
 int
