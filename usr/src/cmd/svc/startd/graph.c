@@ -21,10 +21,10 @@
 
 /*
  * Copyright (c) 2004, 2010, Oracle and/or its affiliates. All rights reserved.
- * Copyright 2013, Joyent, Inc. All rights reserved.
  * Copyright (c) 2015, Syneto S.R.L. All rights reserved.
  * Copyright 2016 Toomas Soome <tsoome@me.com>
  * Copyright 2016 RackTop Systems.
+ * Copyright 2018 Joyent, Inc.
  */
 
 /*
@@ -579,7 +579,7 @@ typedef enum {
 typedef int (*graph_walk_cb_t)(graph_vertex_t *, void *);
 
 typedef struct graph_walk_info {
-	graph_walk_dir_t 	gi_dir;
+	graph_walk_dir_t	gi_dir;
 	uchar_t			*gi_visited;	/* vertex bitmap */
 	int			(*gi_pre)(graph_vertex_t *, void *);
 	void			(*gi_post)(graph_vertex_t *, void *);

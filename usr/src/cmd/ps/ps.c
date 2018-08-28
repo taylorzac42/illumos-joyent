@@ -31,7 +31,7 @@
  */
 
 /*	Copyright (c) 1984, 1986, 1987, 1988, 1989 AT&T	*/
-/*	  All Rights Reserved  	*/
+/*	  All Rights Reserved	*/
 
 /*
  * ps -- print things about processes.
@@ -2409,7 +2409,7 @@ przom(psinfo_t *psinfo)
 	}
 	if (fflg) {
 		int width = fname[F_STIME].width;
-		(void) printf(" %*.*s", width, width, "-"); 	/* STIME */
+		(void) printf(" %*.*s", width, width, "-");	/* STIME */
 	}
 	(void) printf(" %-8.14s", "?");				/* TTY */
 
@@ -2489,9 +2489,9 @@ delta_secs(const timestruc_t *start)
 /*
  * Returns the following:
  *
- * 	0	No error
- * 	EINVAL	Invalid number
- * 	ERANGE	Value exceeds (min, max) range
+ *	0	No error
+ *	EINVAL	Invalid number
+ *	ERANGE	Value exceeds (min, max) range
  */
 static int
 str2id(const char *p, pid_t *val, long min, long max)
@@ -2526,9 +2526,9 @@ str2id(const char *p, pid_t *val, long min, long max)
 /*
  * Returns the following:
  *
- * 	0	No error
- * 	EINVAL	Invalid number
- * 	ERANGE	Value exceeds (min, max) range
+ *	0	No error
+ *	EINVAL	Invalid number
+ *	ERANGE	Value exceeds (min, max) range
  */
 static int
 str2uid(const char *p, uid_t *val, unsigned long min, unsigned long max)

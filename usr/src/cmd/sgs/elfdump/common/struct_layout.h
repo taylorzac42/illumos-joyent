@@ -102,7 +102,7 @@ typedef struct {
  */
 typedef union {
 	char		sld_i8;
-	uchar_t 	sld_ui8;
+	uchar_t		sld_ui8;
 	short		sld_i16;
 	ushort_t	sld_ui16;
 	int32_t		sld_i32;

@@ -25,7 +25,7 @@
  */
 /*
  * Copyright 2012 DEY Storage Systems, Inc.  All rights reserved.
- * Copyright 2017, Joyent, Inc.
+ * Copyright 2018, Joyent, Inc.
  */
 
 #ifndef _SYS_PROCFS_H
@@ -347,7 +347,7 @@ typedef struct prxmap {
 	int	pr_shmid;	/* SysV shmid, -1 if not SysV shared memory */
 	dev_t	pr_dev;	/* st_dev from stat64() of mapped object, or PRNODEV */
 	uint64_t pr_ino; /* st_ino from stat64() of mapped object, if any */
-	size_t	pr_rss; 	/* pages of resident memory */
+	size_t	pr_rss;		/* pages of resident memory */
 	size_t	pr_anon;	/* pages of resident anonymous memory */
 	size_t	pr_locked;	/* pages of locked memory */
 	size_t	pr_pad;		/* currently unused */

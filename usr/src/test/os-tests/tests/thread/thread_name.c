@@ -223,9 +223,9 @@ main(int argc, char *argv[])
 	if (lseek(fd, 0, SEEK_SET) != 0)
 		errx(EXIT_FAILURE, "test %d failed with %d", test, errno);
 
-	n = write(fd, "foo", sizeof("foo"));
+	n = write(fd, "foo", sizeof ("foo"));
 
-	if (n != sizeof("foo"))
+	if (n != sizeof ("foo"))
 		errx(EXIT_FAILURE, "test %d failed with %d", test, errno);
 
 	if (lseek(fd, 0, SEEK_SET) != 0)

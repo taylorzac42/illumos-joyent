@@ -278,7 +278,7 @@ extern	void	optimize_symtab(sym_tbl_t *);
 extern	void	Pbuild_file_symtab(struct ps_prochandle *, file_info_t *);
 extern	ctf_file_t *Pbuild_file_ctf(struct ps_prochandle *, file_info_t *);
 extern	map_info_t *Paddr2mptr(struct ps_prochandle *, uintptr_t);
-extern	char 	*Pfindexec(struct ps_prochandle *, const char *,
+extern	char	*Pfindexec(struct ps_prochandle *, const char *,
 	int (*)(const char *, void *), void *);
 extern	int	getlwpstatus(struct ps_prochandle *, lwpid_t, lwpstatus_t *);
 int	Pstopstatus(struct ps_prochandle *, long, uint32_t);

@@ -159,8 +159,8 @@ static table_t	prj_tbl = {0, 0, NULL};		/* selected projects */
 static table_t	tsk_tbl = {0, 0, NULL};		/* selected tasks */
 static table_t	lgr_tbl = {0, 0, NULL};		/* selected lgroups */
 static zonetbl_t zone_tbl = {0, 0, NULL};	/* selected zones */
-static uidtbl_t euid_tbl = {0, 0, NULL}; 	/* selected effective users */
-static uidtbl_t ruid_tbl = {0, 0, NULL}; 	/* selected real users */
+static uidtbl_t euid_tbl = {0, 0, NULL};	/* selected effective users */
+static uidtbl_t ruid_tbl = {0, 0, NULL};	/* selected real users */
 
 static uint_t	total_procs;			/* total number of procs */
 static uint_t	total_lwps;			/* total number of lwps */

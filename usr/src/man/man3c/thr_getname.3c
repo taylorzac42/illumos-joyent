@@ -15,7 +15,7 @@
 .Dt THR_GETNAME 3C
 .Os
 .Sh NAME
-.Nm thr_getname,
+.Nm thr_getname ,
 .Nm thr_setname
 .Nd get or set the name of a thread
 .Sh SYNOPSIS

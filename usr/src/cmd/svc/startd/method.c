@@ -21,7 +21,7 @@
 
 /*
  * Copyright (c) 2004, 2010, Oracle and/or its affiliates. All rights reserved.
- * Copyright 2012 Joyent, Inc. All rights reserved.
+ * Copyright 2018 Joyent, Inc.
  */
 
 /*

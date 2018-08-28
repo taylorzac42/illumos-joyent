@@ -27,7 +27,7 @@
 /*	  All Rights Reserved	*/
 
 /*
- * Copyright 2016 Joyent, Inc.
+ * Copyright 2018 Joyent, Inc.
  */
 
 #ifndef _SYS_PROC_PRDATA_H
@@ -364,7 +364,7 @@ extern	void	prgetaction(proc_t *, user_t *, uint_t, struct sigaction *);
 extern	void	prgetusage(kthread_t *, struct prhusage *);
 extern	void	praddusage(kthread_t *, struct prhusage *);
 extern	void	prcvtusage(struct prhusage *, prusage_t *);
-extern	void 	prscaleusage(prhusage_t *);
+extern	void	prscaleusage(prhusage_t *);
 extern	kthread_t *prchoose(proc_t *);
 extern	void	allsetrun(proc_t *);
 extern	int	setisempty(uint32_t *, uint_t);

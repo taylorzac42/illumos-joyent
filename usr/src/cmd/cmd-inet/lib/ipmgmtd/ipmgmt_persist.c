@@ -21,7 +21,7 @@
 
 /*
  * Copyright (c) 2010, Oracle and/or its affiliates. All rights reserved.
- * Copyright 2015 Joyent, Inc.
+ * Copyright 2018 Joyent, Inc.
  * Copyright 2016 Argo Technologie SA.
  * Copyright (c) 2016-2017, Chris Fraire <cfraire@me.com>.
  */
@@ -1135,7 +1135,7 @@ ipmgmt_aobjmap_init(void *arg, nvlist_t *db_nvl, char *buf, size_t buflen,
 {
 	nvpair_t		*nvp = NULL;
 	char			*name, *strval = NULL;
-	ipmgmt_aobjmap_t 	node;
+	ipmgmt_aobjmap_t	node;
 	struct sockaddr_in6	*in6;
 
 	*errp = 0;

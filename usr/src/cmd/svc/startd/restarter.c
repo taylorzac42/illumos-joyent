@@ -21,7 +21,7 @@
 
 /*
  * Copyright (c) 2004, 2010, Oracle and/or its affiliates. All rights reserved.
- * Copyright (c) 2013, Joyent, Inc. All rights reserved.
+ * Copyright 2018 Joyent, Inc.
  */
 
 /*
@@ -1943,8 +1943,8 @@ out:
 }
 
 static int
-is_admin_event(restarter_event_type_t t) {
-
+is_admin_event(restarter_event_type_t t)
+{
 	switch (t) {
 	case RESTARTER_EVENT_TYPE_ADMIN_MAINT_ON:
 	case RESTARTER_EVENT_TYPE_ADMIN_MAINT_ON_IMMEDIATE:

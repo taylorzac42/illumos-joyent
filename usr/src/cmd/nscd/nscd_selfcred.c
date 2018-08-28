@@ -22,7 +22,7 @@
 /*
  * Copyright (c) 2006, 2010, Oracle and/or its affiliates. All rights reserved.
  * Copyright 2012 Milan Jurik. All rights reserved.
- * Copyright 2017 Joyent Inc.
+ * Copyright 2018 Joyent Inc.
  */
 
 #include <stdio.h>
@@ -1420,7 +1420,7 @@ check_uid(char *pid_name)
 	static uid_t	uid = 0;
 	static uid_t	euid = 0;
 	int		pfd; /* file descriptor for /proc/<pid>/psinfo */
-	psinfo_t 	info;  /* process information from /proc */
+	psinfo_t	info;  /* process information from /proc */
 
 	if (uid == 0)  {
 		pid = getpid();

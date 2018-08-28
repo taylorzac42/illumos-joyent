@@ -21,12 +21,12 @@
 
 /*
  * Copyright (c) 1989, 2010, Oracle and/or its affiliates. All rights reserved.
- * Copyright (c) 2017, Joyent, Inc.
+ * Copyright (c) 2018, Joyent, Inc.
  * Copyright (c) 2017 by Delphix. All rights reserved.
  */
 
 /*	Copyright (c) 1984,	 1986, 1987, 1988, 1989 AT&T	*/
-/*	  All Rights Reserved  	*/
+/*	  All Rights Reserved	*/
 
 #include <sys/types.h>
 #include <sys/param.h>
@@ -1121,7 +1121,7 @@ pr_read_auxv(prnode_t *pnp, uio_t *uiop)
  *	we have two kinds of LDT structures to export -- one for compatibility
  *	mode, and one for long mode, sigh.
  *
- * 	For now lets just have a ldt of size 0 for 64-bit processes.
+ *	For now lets just have a ldt of size 0 for 64-bit processes.
  */
 static int
 pr_read_ldt(prnode_t *pnp, uio_t *uiop)

@@ -21,6 +21,8 @@
 /*
  * Copyright 2010 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
+ *
+ * Copyright 2018 Joyent, Inc.
  */
 
 #include <sys/isa_defs.h>
@@ -414,7 +416,7 @@ thread_call_stack(void *data, const lwpstatus_t *psp,
 
 static int
 lwp_call_stack(void *data,
-	const lwpstatus_t *psp, const lwpsinfo_t *pip)
+    const lwpstatus_t *psp, const lwpsinfo_t *pip)
 {
 	char lwpname[THREAD_NAME_MAX] = "";
 	pstack_handle_t *h = data;

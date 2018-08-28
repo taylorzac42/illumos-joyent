@@ -20,6 +20,8 @@
  */
 /*
  * Copyright (c) 1999, 2010, Oracle and/or its affiliates. All rights reserved.
+ *
+ * Copyright 2018 Joyent, Inc.
  */
 
 #include <assert.h>

@@ -21,11 +21,11 @@
 
 /*
  * Copyright (c) 1989, 2010, Oracle and/or its affiliates. All rights reserved.
- * Copyright 2017, Joyent, Inc.
+ * Copyright 2018, Joyent, Inc.
  */
 
 /*	Copyright (c) 1984, 1986, 1987, 1988, 1989 AT&T	*/
-/*	  All Rights Reserved  	*/
+/*	  All Rights Reserved	*/
 
 #include <sys/types.h>
 #include <sys/t_lock.h>
@@ -2702,7 +2702,7 @@ prgetlwpsinfo32(kthread_t *t, lwpsinfo32_t *psp)
 #define	PR_COPY_TIMESPEC(s, d, field)				\
 	TIMESPEC_TO_TIMESPEC32(&d->field, &s->field);
 
-#define	PR_COPY_BUF(s, d, field)	 			\
+#define	PR_COPY_BUF(s, d, field)				\
 	bcopy(s->field, d->field, sizeof (d->field));
 
 #define	PR_IGNORE_FIELD(s, d, field)
