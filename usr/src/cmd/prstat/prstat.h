@@ -115,6 +115,7 @@ typedef struct lwp_info {
 	ulong_t		li_icx;		/* involuntary context switches */
 	ulong_t		li_scl;		/* system calls */
 	ulong_t		li_sig;		/* received signals */
+	char		li_lwpname[THREAD_NAME_MAX];
 	struct lwp_info *li_next;	/* pointer to next lwp */
 	struct lwp_info *li_prev;	/* pointer to previous lwp */
 } lwp_info_t;

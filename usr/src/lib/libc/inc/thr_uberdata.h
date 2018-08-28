@@ -57,6 +57,7 @@
 #include <sys/priocntl.h>
 #include <thread_db.h>
 #include <setjmp.h>
+#include <sys/thread.h>
 #include "libc_int.h"
 #include "tdb_agent.h"
 #include "thr_debug.h"
@@ -529,8 +530,6 @@ typedef void (*tmem_func_t)(void *, int);
  * Round up an integral value to a multiple of 64
  */
 #define	roundup64(x)	(-(-(x) & -64))
-
-#define	THR_NAME_MAX	(32)
 
 /*
  * NOTE:  Whatever changes are made to ulwp_t must be
@@ -1239,7 +1238,7 @@ typedef	struct	_thrattr {
 	int	policy;
 	int	inherit;
 	size_t	guardsize;
-	char	name[THR_NAME_MAX];
+	char	name[THREAD_NAME_MAX];
 } thrattr_t;
 
 typedef	struct	_rwlattr {

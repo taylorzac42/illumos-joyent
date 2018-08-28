@@ -137,6 +137,7 @@ typedef enum prnodetype {
 	PR_LWPDIR,		/* /proc/<pid>/lwp			*/
 	PR_LWPIDDIR,		/* /proc/<pid>/lwp/<lwpid>		*/
 	PR_LWPCTL,		/* /proc/<pid>/lwp/<lwpid>/lwpctl	*/
+	PR_LWPNAME,		/* /proc/<pid>/lwp/<lwpid>/lwpname	*/
 	PR_LWPSTATUS,		/* /proc/<pid>/lwp/<lwpid>/lwpstatus	*/
 	PR_LWPSINFO,		/* /proc/<pid>/lwp/<lwpid>/lwpsinfo	*/
 	PR_LWPUSAGE,		/* /proc/<pid>/lwp/<lwpid>/lwpusage	*/

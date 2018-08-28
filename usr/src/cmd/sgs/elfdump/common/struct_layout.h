@@ -28,6 +28,10 @@
  * Copyright 2012 DEY Storage Systems, Inc.  All rights reserved.
  */
 
+/*
+ * Copyright 2018 Joyent, Inc.
+ */
+
 #ifndef	_STRUCT_LAYOUT_H
 #define	_STRUCT_LAYOUT_H
 
@@ -363,7 +367,6 @@ typedef struct {
 	sl_field_t		pr_bindpro;
 	sl_field_t		pr_bindpset;
 	sl_field_t		pr_lgrp;
-	sl_field_t		pr_lwpname;
 } sl_lwpsinfo_layout_t;
 
 /*
@@ -536,6 +539,12 @@ typedef struct {
 	sl_field_t		pr_upper;
 } sl_prsecflags_layout_t;
 
+typedef struct {
+	sl_field_t		sizeof_struct;
+	sl_field_t		pr_lwpid;
+	sl_field_t		pr_lwpname;
+} sl_prlwpname_layout_t;
+
 /*
  * This type collects all of the layout definitions for
  * a given architecture.
@@ -562,6 +571,7 @@ typedef struct {
 	const sl_utsname_layout_t	*utsname;	/* struct utsname */
 	const sl_prfdinfo_layout_t	*prfdinfo;	/* prdinfo_t */
 	const sl_prsecflags_layout_t	*prsecflags;	/* prsecflags_t */
+	const sl_prlwpname_layout_t	*prlwpname;	/* prlwpname_t */
 } sl_arch_layout_t;
 
 

@@ -2411,79 +2411,75 @@ __nthreads(void)
 	return (curthread->ul_uberdata->nthreads);
 }
 
+#pragma weak pthread_setname_np = thr_setname
 int
-pthread_setname_np(pthread_t tid, const char *name)
+thr_setname(pthread_t tid, const char *name)
 {
-	extern ssize_t __pwrite(int, const void *, size_t, off_t);
-	char buf[100];
-	char namebuf[THR_NAME_MAX] = { 0 };
-	off_t offset = offsetof(lwpsinfo_t, pr_lwpname);
+	extern ssize_t __write(int, const void *, size_t);
+	char path[PATH_MAX];
+	size_t len;
 	ssize_t n;
 	int fd;
 
 	if (name == NULL)
 		name = "";
 
-	if (strlen(name) + 1 > THR_NAME_MAX)
+	len = strlen(name) + 1;
+	if (len > THREAD_NAME_MAX)
 		return (ERANGE);
 
-	(void) strlcpy(namebuf, name, sizeof (namebuf));
+	/* "/proc/self/lwp/%u/lwpname" w/o stdio */
+	(void) strlcpy(path, "/proc/self/lwp/", sizeof (path));
+	ultos((uint64_t)tid, 10, path + strlen(path));
+	(void) strlcat(path, "/lwpname", sizeof (path));
 
-	/* "/proc/self/lwp/%u/lwpsinfo" w/o stdio */
-	(void) strlcpy(buf, "/proc/self/lwp/", sizeof (buf));
-	ultos((uint64_t)tid, 10, buf + strlen(buf));
-	(void) strlcat(buf, "/lwpsinfo", sizeof (buf));
-
-	if ((fd = __open(buf, O_WRONLY, 0)) < 0) {
+	if ((fd = __open(path, O_WRONLY, 0)) < 0) {
 		if (errno == ENOENT)
 			errno = ESRCH;
 		return (errno);
 	}
 
-	n = __pwrite(fd, namebuf, sizeof (namebuf), offset);
+	n = __write(fd, name, len);
 	(void) __close(fd);
 
-	if (n != sizeof (namebuf))
+	if (n != len)
 		return (EFAULT);
 	else if (n < 0)
 		return (errno);
 	return (0);
 }
 
+#pragma weak pthread_getname_np = thr_getname
 int
-pthread_getname_np(pthread_t tid, char *name, size_t len)
+thr_getname(pthread_t tid, char *buf, size_t bufsize)
 {
-	extern ssize_t __pread(int, void *, size_t, off_t);
-	char buf[100];
-	char namebuf[THR_NAME_MAX] = { 0 };
-	off_t offset = offsetof(lwpsinfo_t, pr_lwpname);
+	extern ssize_t __read(int, void *, size_t);
+	char name[THREAD_NAME_MAX];
+	char path[PATH_MAX];
 	ssize_t n;
 	int fd;
 
-	if (name == NULL)
+	if (buf == NULL)
 		return (EINVAL);
 
 	/* "/proc/self/lwp/%u/name" w/o stdio */
-	(void) strlcpy(buf, "/proc/self/lwp/", sizeof (buf));
-	ultos((uint64_t)tid, 10, buf + strlen(buf));
-	(void) strlcat(buf, "/lwpsinfo", sizeof (buf));
+	(void) strlcpy(path, "/proc/self/lwp/", sizeof (path));
+	ultos((uint64_t)tid, 10, path + strlen(path));
+	(void) strlcat(path, "/lwpname", sizeof (path));
 
-	if ((fd = __open(buf, O_RDONLY, 0)) < 0) {
+	if ((fd = __open(path, O_RDONLY, 0)) < 0) {
 		if (errno == ENOENT)
 			errno = ESRCH;
 		return (errno);
 	}
 
-	n = __pread(fd, namebuf, sizeof (namebuf), offset);
+	n = __read(fd, name, sizeof (name));
 	(void) __close(fd);
 
-	if (n != sizeof (namebuf))
-		return (EFAULT);
+	if (n < 0)
+		return (errno);
 
-	if (namebuf[THR_NAME_MAX - 1] != '\0')
-		namebuf[THR_NAME_MAX - 1] = '\0';
-
-	if (strlcpy(name, namebuf, len) >= len)
+	if (n != sizeof (name) || strlcpy(buf, name, bufsize) >= bufsize)
 		return (ERANGE);
 
 	return (0);

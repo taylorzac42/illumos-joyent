@@ -24,7 +24,7 @@
  */
 /*
  * Copyright 2012 DEY Storage Systems, Inc.  All rights reserved.
- * Copyright (c) 2017, Joyent, Inc. All rights reserved.
+ * Copyright (c) 2018, Joyent, Inc. All rights reserved.
  * Copyright (c) 2013 by Delphix. All rights reserved.
  * Copyright 2015 Gary Mills
  */
@@ -358,10 +358,6 @@ lwpid2info(struct ps_prochandle *P, lwpid_t id)
 		}
 	}
 
-	/*
-	 * NOTE: To support reading older versions of lwpsinfo_t,
-	 * the lwp_info_t should be zero-filled when allocated.
-	 */
 	next = lwp;
 	if ((lwp = calloc(1, sizeof (lwp_info_t))) == NULL)
 		return (NULL);
@@ -693,16 +689,6 @@ err:
 	return (-1);
 }
 
-
-/* The smallest versions of lwpsinfo_t we can read */
-
-#ifdef _LP64
-#define	LWPSINFO32_MIN	(104)
-#define	LWPSINFO_MIN	(128)
-#else
-#define	LWPSINFO_MIN	(104)
-#endif
-
 static int
 note_lwpsinfo(struct ps_prochandle *P, size_t nbytes)
 {
@@ -715,17 +701,15 @@ note_lwpsinfo(struct ps_prochandle *P, size_t nbytes)
 	if (core->core_dmodel == PR_MODEL_ILP32) {
 		lwpsinfo32_t l32;
 
-		if (nbytes < LWPSINFO32_MIN ||
-		    nbytes > sizeof (l32) ||
-		    read(P->asfd, &l32, nbytes) != nbytes)
+		if (nbytes < sizeof (lwpsinfo32_t) ||
+		    read(P->asfd, &l32, sizeof (l32)) != sizeof (l32))
 			goto err;
 
 		lwpsinfo_32_to_n(&l32, &lps);
 	} else
 #endif
-	if (nbytes < LWPSINFO_MIN ||
-	    nbytes > sizeof (lwpsinfo_t) ||
-	    read(P->asfd, &lps, nbytes) != nbytes)
+	if (nbytes < sizeof (lwpsinfo_t) ||
+	    read(P->asfd, &lps, sizeof (lps)) != sizeof (lps))
 		goto err;
 
 	if ((lwp = lwpid2info(P, lps.pr_lwpid)) == NULL) {
@@ -738,6 +722,32 @@ note_lwpsinfo(struct ps_prochandle *P, size_t nbytes)
 
 err:
 	dprintf("Pgrab_core: failed to read NT_LWPSINFO\n");
+	return (-1);
+}
+
+static int
+note_lwpname(struct ps_prochandle *P, size_t nbytes)
+{
+	prlwpname_t name;
+	lwp_info_t *lwp;
+
+	if (nbytes != sizeof (name) ||
+	    read(P->asfd, &name, sizeof (name)) != sizeof (name))
+		goto err;
+
+	if ((lwp = lwpid2info(P, name.pr_lwpid)) == NULL)
+		goto err;
+
+	if (strlcpy(lwp->lwp_name, name.pr_lwpname,
+	    sizeof (lwp->lwp_name)) >= sizeof (lwp->lwp_name)) {
+		errno = ENAMETOOLONG;
+		goto err;
+	}
+
+	return (0);
+
+err:
+	dprintf("Pgrab_core: failed to read NT_LWPNAME\n");
 	return (-1);
 }
 
@@ -1247,6 +1257,7 @@ static int (*nhdlrs[])(struct ps_prochandle *, size_t) = {
 	note_fdinfo,		/* 22	NT_FDINFO		*/
 	note_spymaster,		/* 23	NT_SPYMASTER		*/
 	note_secflags,		/* 24	NT_SECFLAGS		*/
+	note_lwpname,		/* 25	NT_LWPNAME		*/
 };
 
 static void

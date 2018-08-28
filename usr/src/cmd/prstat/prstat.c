@@ -399,7 +399,7 @@ list_print(list_t *list)
 	char psize[6], prssize[6], pmem[6], pcpu[6], ptime[12];
 	char pstate[7], pnice[4], ppri[4];
 	char pname[LOGNAME_MAX+1];
-	char name[PRFNSZ + PRLWPNSZ + 2];
+	char name[PRFNSZ + THREAD_NAME_MAX + 2];
 	char projname[PROJNAME_MAX+1];
 	char zonename[ZONENAME_MAX+1];
 	float cpu, mem;
@@ -546,7 +546,7 @@ list_print(list_t *list)
 			lwp = list->l_ptrs[i];
 			if (opts.o_outpmode & OPT_LWPS) {
 				lwpid = lwp->li_info.pr_lwp.pr_lwpid;
-				lwpname = lwp->li_info.pr_lwp.pr_lwpname;
+				lwpname = lwp->li_lwpname;
 			} else {
 				lwpid = lwp->li_info.pr_nlwp +
 				    lwp->li_info.pr_nzomb;
@@ -997,6 +997,26 @@ add_proc(psinfo_t *psinfo)
 }
 
 static void
+get_lwpname(pid_t pid, id_t lwpid, char *buf, size_t bufsize)
+{
+	char *path = NULL;
+	int fd;
+
+	buf[0] = '\0';
+
+	if (asprintf(&path, "/proc/%d/lwp/%d/lwpname",
+	    (int)pid, (int)lwpid) == -1)
+		return;
+
+	if ((fd = open(path, O_RDONLY)) != -1) {
+		(void) read(fd, buf, bufsize);
+		(void) close(fd);
+	}
+
+	free(path);
+}
+
+static void
 add_lwp(psinfo_t *psinfo, lwpsinfo_t *lwpsinfo, int flags)
 {
 	lwp_info_t *lwp;
@@ -1011,6 +1031,7 @@ add_lwp(psinfo_t *psinfo, lwpsinfo_t *lwpsinfo, int flags)
 	(void) memcpy(&lwp->li_info, psinfo,
 	    sizeof (psinfo_t) - sizeof (lwpsinfo_t));
 	(void) memcpy(&lwp->li_info.pr_lwp, lwpsinfo, sizeof (lwpsinfo_t));
+	get_lwpname(pid, lwpid, lwp->li_lwpname, sizeof (lwp->li_lwpname));
 }
 
 static void

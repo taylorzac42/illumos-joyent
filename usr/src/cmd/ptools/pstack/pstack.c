@@ -380,6 +380,7 @@ static int
 thread_call_stack(void *data, const lwpstatus_t *psp,
     const lwpsinfo_t *pip)
 {
+	char lwpname[THREAD_NAME_MAX] = "";
 	pstack_handle_t *h = data;
 	lwpstatus_t lwpstatus;
 	struct threadinfo *tip;
@@ -391,7 +392,10 @@ thread_call_stack(void *data, const lwpstatus_t *psp,
 	if ((tip = find_thread(pip->pr_lwpid)) == NULL)
 		return (0);
 
-	tlhead(tip->threadid, pip->pr_lwpid, pip->pr_lwpname);
+	(void) Plwp_getname(h->proc, pip->pr_lwpid,
+	    lwpname, sizeof (lwpname));
+
+	tlhead(tip->threadid, pip->pr_lwpid, lwpname);
 	tip->threadid = 0;	/* finish eliminating tid */
 	if (psp)
 		call_stack(h, psp);
@@ -412,13 +416,17 @@ static int
 lwp_call_stack(void *data,
 	const lwpstatus_t *psp, const lwpsinfo_t *pip)
 {
+	char lwpname[THREAD_NAME_MAX] = "";
 	pstack_handle_t *h = data;
 
 	if (!proc_lwp_in_set(h->lwps, pip->pr_lwpid))
 		return (0);
 	h->count++;
 
-	tlhead(0, pip->pr_lwpid, pip->pr_lwpname);
+	(void) Plwp_getname(h->proc, pip->pr_lwpid,
+	    lwpname, sizeof (lwpname));
+
+	tlhead(0, pip->pr_lwpid, lwpname);
 	if (psp)
 		call_stack(h, psp);
 	else
@@ -503,8 +511,9 @@ tlhead(id_t threadid, id_t lwpid, const char *name)
 	}
 
 	if (name != NULL && strlen(name) > 0) {
-		(void) strlcat(buf, " / ", sizeof (buf));
+		(void) strlcat(buf, " [", sizeof (buf));
 		(void) strlcat(buf, name, sizeof (buf));
+		(void) strlcat(buf, "]", sizeof (buf));
 	}
 
 	amt = (HEAD_WIDTH - strlen(buf) - 2);

@@ -136,6 +136,7 @@ SYMBOL_VERSION SUNWprivate_1.1 {
 	Plookup_by_name;
 	Plwp_alt_stack;
 	Plwp_getfpregs;
+	Plwp_getname;
 	Plwp_getpsinfo;
 	Plwp_getregs;
 	Plwp_getspymaster;

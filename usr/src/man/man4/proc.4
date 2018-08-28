@@ -1049,28 +1049,27 @@ are zero and the other fields of
 are undefined:
 .Bd -literal -offset 2
 typedef struct lwpsinfo {
-    int pr_flag;               /* lwp flags (DEPRECATED: see below) */
-    id_t pr_lwpid;             /* lwp id */
-    uintptr_t pr_addr;         /* internal address of lwp */
-    uintptr_t pr_wchan;        /* wait addr for sleeping lwp */
-    char pr_stype;             /* synchronization event type */
-    char pr_state;             /* numeric lwp state */
-    char pr_sname;             /* printable character for pr_state */
-    char pr_nice;              /* nice for cpu usage */
-    short pr_syscall;          /* system call number (if in syscall) */
-    char pr_oldpri;            /* pre-SVR4, low value is high priority */
-    char pr_cpu;               /* pre-SVR4, cpu usage for scheduling */
-    int pr_pri;                /* priority, high value = high priority */
-    ushort_t pr_pctcpu;        /* % of recent cpu time used by this lwp */
-    timestruc_t pr_start;      /* lwp start time, from the epoch */
-    timestruc_t pr_time;       /* cpu time for this lwp */
-    char pr_clname[PRCLSZ];    /* scheduling class name */
-    char pr_name[PRFNSZ];      /* name of system lwp */
-    processorid_t pr_onpro;    /* processor which last ran this lwp */
-    processorid_t pr_bindpro;  /* processor to which lwp is bound */
-    psetid_t pr_bindpset;      /* processor set to which lwp is bound */
-    lgrp_id_t pr_lgrp          /* home lgroup */
-    char pr_lwpname[PRLWPNSZ]; /* lwp name */
+    int pr_flag;             /* lwp flags (DEPRECATED: see below) */
+    id_t pr_lwpid;           /* lwp id */
+    uintptr_t pr_addr;       /* internal address of lwp */
+    uintptr_t pr_wchan;      /* wait addr for sleeping lwp */
+    char pr_stype;           /* synchronization event type */
+    char pr_state;           /* numeric lwp state */
+    char pr_sname;           /* printable character for pr_state */
+    char pr_nice;            /* nice for cpu usage */
+    short pr_syscall;        /* system call number (if in syscall) */
+    char pr_oldpri;          /* pre-SVR4, low value is high priority */
+    char pr_cpu;             /* pre-SVR4, cpu usage for scheduling */
+    int pr_pri;              /* priority, high value = high priority */
+    ushort_t pr_pctcpu;      /* % of recent cpu time used by this lwp */
+    timestruc_t pr_start;    /* lwp start time, from the epoch */
+    timestruc_t pr_time;     /* cpu time for this lwp */
+    char pr_clname[PRCLSZ];  /* scheduling class name */
+    char pr_name[PRFNSZ];    /* name of system lwp */
+    processorid_t pr_onpro;  /* processor which last ran this lwp */
+    processorid_t pr_bindpro;/* processor to which lwp is bound */
+    psetid_t pr_bindpset;    /* processor set to which lwp is bound */
+    lgrp_id_t pr_lgrp	      /* home lgroup */
 } lwpsinfo_t;
 .Ed
 .Pp
@@ -1104,13 +1103,6 @@ See
 .Xr contract 4
 and
 .Xr process 4 .
-.Pp
-.Sy pr_lwpname
-contains the name of thread, or the empty string if not set.
-This field is not present in older operating system versions.
-The similar-sounding
-.Sy pr_name
-is not used and should be ignored.
 .Ss cred
 Contains a description of the credentials associated with the process:
 .Bd -literal -offset 2
@@ -1655,6 +1647,14 @@ The messages written to this file affect the specific
 lwp rather than the representative lwp, as is the case for the process's
 .Pa ctl
 file.
+.Ss lwpname
+A buffer of THREAD_NAME_MAX bytes representing the LWP name; the buffer is
+zero-filled if the thread name is shorter than the buffer.
+If no thread name is set, the buffer contains the empty string.
+A read with a buffer shorter than THREAD_NAME_MAX bytes is not guaranteed
+to be NIL-terminated.
+Writing to this file will set the LWP name for the specific lwp.
+This file may not be present in older operating system versions.
 .Ss lwpstatus
 lwp-specific state information.
 This file contains the

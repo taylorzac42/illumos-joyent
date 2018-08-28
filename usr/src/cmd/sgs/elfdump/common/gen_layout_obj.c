@@ -58,3 +58,4 @@ timestruc_t ts;
 struct utsname uts;
 prfdinfo_t ptfd;
 prsecflags_t psf;
+prlwpname_t psn;

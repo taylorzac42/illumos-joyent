@@ -1306,18 +1306,18 @@ pt_regstatus(uintptr_t addr, uint_t flags, int argc, const mdb_arg_t *argv)
 static void
 pt_thread_name(mdb_tgt_t *t, mdb_tgt_tid_t tid, char *buf, size_t bufsize)
 {
-	lwpsinfo_t info;
+	char name[THREAD_NAME_MAX];
 
 	buf[0] = '\0';
 
 	if (t->t_pshandle == NULL ||
-	    Plwp_getpsinfo(t->t_pshandle, (lwpid_t)tid, &info) != 0 ||
-	    info.pr_lwpname[0] == '\0') {
+	    Plwp_getname(t->t_pshandle, tid, name, sizeof (name)) != 0 ||
+	    name[0] == '\0') {
 		(void) mdb_snprintf(buf, bufsize, "%lu", tid);
 		return;
 	}
 
-	(void) mdb_snprintf(buf, bufsize, "%lu [%s]", tid, info.pr_lwpname);
+	(void) mdb_snprintf(buf, bufsize, "%lu [%s]", tid, name);
 }
 
 static int

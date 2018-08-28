@@ -14,7 +14,7 @@
 # Copyright 2018 Nexenta Systems, Inc.
 # Copyright 2013, OmniTI Computer Consulting, Inc. All rights reserved.
 # Copyright 2014 Garrett D'Amore <garrett@damore.org>
-# Copyright 2016 Joyent, Inc.
+# Copyright 2018 Joyent, Inc.
 #
 
 include		$(SRC)/Makefile.master
@@ -478,6 +478,7 @@ MANFILES=	__fbufsize.3c					\
 		termios.3c					\
 		thr_create.3c					\
 		thr_exit.3c					\
+		thr_getname.3c					\
 		thr_getconcurrency.3c				\
 		thr_getprio.3c					\
 		thr_join.3c					\
@@ -1294,6 +1295,7 @@ MANLINKS=	FD_CLR.3c				\
 		thr_continue.3c				\
 		thr_getspecific.3c			\
 		thr_keycreate_once.3c			\
+		thr_setname.3c				\
 		thr_setconcurrency.3c			\
 		thr_setprio.3c				\
 		thr_setspecific.3c			\
@@ -2411,6 +2413,8 @@ thr_keycreate_once.3c			:= LINKSRC = thr_keycreate.3c
 thr_setspecific.3c			:= LINKSRC = thr_keycreate.3c
 
 thr_continue.3c				:= LINKSRC = thr_suspend.3c
+
+thr_setname.3c				:= LINKSRC = thr_getname.3c
 
 timegm.3c				:= LINKSRC = mktime.3c
 

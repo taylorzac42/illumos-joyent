@@ -1362,6 +1362,26 @@ prfind(int found, psinfo_t *psinfo, char **tpp)
 	return (1);
 }
 
+static void
+get_lwpname(psinfo_t *psinfo, char *buf, size_t bufsize)
+{
+	char *path = NULL;
+	int fd;
+
+	buf[0] = '\0';
+
+	if (asprintf(&path, "/proc/%d/lwp/%d/lwpname", (int)psinfo->pr_pid,
+	    (int)psinfo->pr_lwp.pr_lwpid) == -1)
+		return;
+
+	if ((fd = open(path, O_RDONLY)) != -1) {
+		(void) read(fd, buf, bufsize);
+		(void) close(fd);
+	}
+
+	free(path);
+}
+
 /*
  * Print info about the process.
  */
@@ -1468,8 +1488,12 @@ prcom(psinfo_t *psinfo, char *ttyp)
 		    (int)psinfo->pr_sid);	/* SID  */
 	}
 	if (Lflg) {
+		char lwpname[THREAD_NAME_MAX] = "";
+
+		get_lwpname(psinfo, lwpname, sizeof (lwpname));
+
 		(void) printf(" %5d %8s", (int)psinfo->pr_lwp.pr_lwpid,
-		    psinfo->pr_lwp.pr_lwpname); /* LWP */
+		    lwpname); /* LWP */
 	}
 	if (Pflg) {
 		if (psinfo->pr_lwp.pr_bindpro == PBIND_NONE)	/* PSR */
@@ -1766,9 +1790,12 @@ print_field(psinfo_t *psinfo, struct field *f, const char *ttyp)
 	case F_LWP:
 		(void) printf("%*d", width, (int)psinfo->pr_lwp.pr_lwpid);
 		break;
-	case F_LWPNAME:
-		(void) printf("%*s", width, psinfo->pr_lwp.pr_lwpname);
+	case F_LWPNAME: {
+		char lwpname[THREAD_NAME_MAX] = "";
+		get_lwpname(psinfo, lwpname, sizeof (lwpname));
+		(void) printf("%*s", width, lwpname);
 		break;
+	}
 	case F_NLWP:
 		(void) printf("%*d", width, psinfo->pr_nlwp + psinfo->pr_nzomb);
 		break;

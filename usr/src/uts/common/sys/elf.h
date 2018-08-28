@@ -1017,7 +1017,8 @@ typedef	Elf64_Word	Elf64_Capchain;
 #define	NT_FDINFO	22	/* open fd info 			*/
 #define	NT_SPYMASTER	23	/* psinfo_t for agent LWP spymaster	*/
 #define	NT_SECFLAGS	24	/* process security-flags */
-#define	NT_NUM		24
+#define	NT_LWPNAME	25	/* char lwpname[THREAD_NAME_MAX];	*/
+#define	NT_NUM		25
 
 
 #ifdef _KERNEL

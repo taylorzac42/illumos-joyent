@@ -17,13 +17,18 @@
  * Some basic pthread name API tests.
  */
 
+#include <sys/stat.h>
 #include <pthread.h>
+#include <limits.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <thread.h>
+#include <fcntl.h>
 #include <stdio.h>
 #include <errno.h>
 #include <err.h>
+
 
 /*ARGSUSED*/
 static void *
@@ -39,9 +44,12 @@ main(int argc, char *argv[])
 {
 	char name[PTHREAD_MAX_NAMELEN_NP];
 	pthread_attr_t attr;
+	char path[PATH_MAX];
 	pthread_t tid;
+	ssize_t n;
 	int test;
 	int rc;
+	int fd;
 
 	/* Default thread name is empty string. */
 	test = 1;
@@ -166,6 +174,81 @@ main(int argc, char *argv[])
 	rc = pthread_getname_np(tid, name, sizeof (name));
 
 	if (rc != 0 || strcmp(name, "thread2") != 0)
+		errx(EXIT_FAILURE, "test %d failed with %d", test, rc);
+
+	/* proc read tests */
+	test = 11;
+
+	(void) snprintf(path, sizeof (path),
+	    "/proc/self/lwp/%d/lwpname", (int)tid);
+
+	fd = open(path, O_RDWR);
+
+	if (fd == -1)
+		errx(EXIT_FAILURE, "test %d failed with %d", test, errno);
+
+	n = read(fd, name, sizeof (name));
+
+	if (n != sizeof (name) || strcmp(name, "thread2") != 0)
+		errx(EXIT_FAILURE, "test %d failed with %d", test, rc);
+
+	if (lseek(fd, 0, SEEK_SET) != 0)
+		errx(EXIT_FAILURE, "test %d failed with %d", test, errno);
+
+	n = read(fd, name, PTHREAD_MAX_NAMELEN_NP * 2);
+
+	if (n != sizeof (name) || strcmp(name, "thread2") != 0)
+		errx(EXIT_FAILURE, "test %d failed with %d", test, rc);
+
+	if (lseek(fd, 0, SEEK_SET) != 0)
+		errx(EXIT_FAILURE, "test %d failed with %d", test, errno);
+
+	n = read(fd, name, 4);
+
+	if (n != 4 || strncmp(name, "thre", 4) != 0)
+		errx(EXIT_FAILURE, "test %d failed with %d", test, rc);
+
+	/* proc write tests */
+	test = 12;
+
+	if (lseek(fd, 0, SEEK_SET) != 0)
+		errx(EXIT_FAILURE, "test %d failed with %d", test, errno);
+
+	n = write(fd, "1234567890123456789012345678901",
+	    PTHREAD_MAX_NAMELEN_NP);
+
+	if (n != PTHREAD_MAX_NAMELEN_NP)
+		errx(EXIT_FAILURE, "test %d failed with %d", test, errno);
+
+	if (lseek(fd, 0, SEEK_SET) != 0)
+		errx(EXIT_FAILURE, "test %d failed with %d", test, errno);
+
+	n = write(fd, "foo", sizeof("foo"));
+
+	if (n != sizeof("foo"))
+		errx(EXIT_FAILURE, "test %d failed with %d", test, errno);
+
+	if (lseek(fd, 0, SEEK_SET) != 0)
+		errx(EXIT_FAILURE, "test %d failed with %d", test, errno);
+
+	n = read(fd, name, sizeof (name));
+
+	if (n != sizeof (name) || strcmp(name, "foo") != 0)
+		errx(EXIT_FAILURE, "test %d failed with %d", test, rc);
+
+	(void) close(fd);
+
+	/* thr_* API. */
+	test = 13;
+
+	rc = thr_setname(thr_self(), "main");
+
+	if (rc != 0)
+		errx(EXIT_FAILURE, "test %d failed with %d", test, rc);
+
+	rc = thr_getname(thr_self(), name, sizeof (name));
+
+	if (rc != 0 || strcmp(name, "main") != 0)
 		errx(EXIT_FAILURE, "test %d failed with %d", test, rc);
 
 	return (EXIT_SUCCESS);
