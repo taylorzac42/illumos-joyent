@@ -526,8 +526,8 @@ write_elfnotes(proc_t *p, int sig, vnode_t *vp, offset_t offset,
 		if (error)
 			goto done;
 
-		if (elfnote(vp, &offset, NT_LWPNAME, sizeof (name),
-		    (caddr_t)&name, rlimit, credp) != 0)
+		if ((error = elfnote(vp, &offset, NT_LWPNAME, sizeof (name),
+		    (caddr_t)&name, rlimit, credp)) != 0)
 			goto done;
 
 

@@ -1430,6 +1430,7 @@ dump_lwpsinfo(note_state_t *state, const char *title)
 	indent_exit(state);
 }
 
+
 /*
  * Output information from psinfo_t structure.
  */

@@ -78,6 +78,7 @@ $add amd64
 $endif
 
 SYMBOL_VERSION ILLUMOS_0.28 {
+    protected:
 	pthread_attr_getname_np;
 	pthread_attr_setname_np;
 	pthread_getname_np;

@@ -190,14 +190,14 @@ static prdirent_t lwpiddir[] = {
 		".." },
 	{ PR_LWPCTL,	 3 * sizeof (prdirent_t), sizeof (prdirent_t),
 		"lwpctl" },
-	{ PR_LWPSTATUS,	 4 * sizeof (prdirent_t), sizeof (prdirent_t),
-		"lwpstatus" },
-	{ PR_LWPSINFO,	 5 * sizeof (prdirent_t), sizeof (prdirent_t),
-		"lwpsinfo" },
-	{ PR_LWPUSAGE,	 6 * sizeof (prdirent_t), sizeof (prdirent_t),
-		"lwpusage" },
-	{ PR_LWPNAME,	 7 * sizeof (prdirent_t), sizeof (prdirent_t),
+	{ PR_LWPNAME,	 4 * sizeof (prdirent_t), sizeof (prdirent_t),
 		"lwpname" },
+	{ PR_LWPSTATUS,	 5 * sizeof (prdirent_t), sizeof (prdirent_t),
+		"lwpstatus" },
+	{ PR_LWPSINFO,	 6 * sizeof (prdirent_t), sizeof (prdirent_t),
+		"lwpsinfo" },
+	{ PR_LWPUSAGE,	 7 * sizeof (prdirent_t), sizeof (prdirent_t),
+		"lwpusage" },
 	{ PR_XREGS,	 8 * sizeof (prdirent_t), sizeof (prdirent_t),
 		"xregs" },
 	{ PR_TMPLDIR,	 9 * sizeof (prdirent_t), sizeof (prdirent_t),
@@ -1121,7 +1121,7 @@ pr_read_auxv(prnode_t *pnp, uio_t *uiop)
  *	we have two kinds of LDT structures to export -- one for compatibility
  *	mode, and one for long mode, sigh.
  *
- *	For now lets just have a ldt of size 0 for 64-bit processes.
+ *	For now let's just have a ldt of size 0 for 64-bit processes.
  */
 static int
 pr_read_ldt(prnode_t *pnp, uio_t *uiop)
@@ -2911,8 +2911,10 @@ pr_write_lwpname(prnode_t *pnp, uio_t *uiop)
 
 	lwpname[THREAD_NAME_MAX - 1] = '\0';
 
-	if ((error = prlock(pnp, ZNO)) != 0)
+	if ((error = prlock(pnp, ZNO)) != 0) {
+		kmem_free(lwpname, THREAD_NAME_MAX);
 		return (error);
+	}
 
 	t = pnp->pr_common->prc_thread;
 	if (t->t_name == NULL) {

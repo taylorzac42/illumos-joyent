@@ -83,7 +83,6 @@ pthread_attr_destroy(pthread_attr_t *attr)
 {
 	if (attr == NULL || attr->__pthread_attrp == NULL)
 		return (EINVAL);
-
 	lfree(attr->__pthread_attrp, sizeof (thrattr_t));
 	attr->__pthread_attrp = NULL;
 	return (0);
