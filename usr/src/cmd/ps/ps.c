@@ -178,7 +178,7 @@ static struct def_field fname[] = {
 	{ "sid",	"SID",		5,	5	},
 	{ "psr",	"PSR",		3,	2	},
 	{ "lwp",	"LWP",		6,	2	},
-	{ "lname",	"LNAME",	32,	8	},
+	{ "lwpname",	"LWPNAME",	32,	8	},
 	{ "nlwp",	"NLWP",		4,	2	},
 	{ "opri",	"PRI",		3,	2	},
 	{ "pri",	"PRI",		3,	2	},
@@ -813,6 +813,7 @@ stdmain(int argc, char **argv)
 					(void) printf("%-*s",
 					    f->width, f->header);
 					break;
+				case F_LWPNAME:
 				case F_FNAME:
 				case F_COMM:
 				case F_ARGS:
@@ -861,7 +862,7 @@ stdmain(int argc, char **argv)
 			(void) printf(" %*s %*s", pidwidth, "PGID",
 			    pidwidth, "SID");
 		if (Lflg)
-			(void) printf("   LWP   LNAME");
+			(void) printf("   LWP");
 		if (Pflg)
 			(void) printf(" PSR");
 		if (Lflg && fflg)
@@ -1188,7 +1189,8 @@ parse_format(char *arg)
 	}
 	for (df = &fname[0]; df < &fname[NFIELDS]; df++)
 		if (strcmp(name, df->fname) == 0) {
-			if (strcmp(name, "lwp") == 0)
+			if (strcmp(name, "lwp") == 0  ||
+			    strcmp(name, "lwpname") == 0)
 				Lflg++;
 			break;
 		}
@@ -1362,26 +1364,6 @@ prfind(int found, psinfo_t *psinfo, char **tpp)
 	return (1);
 }
 
-static void
-get_lwpname(psinfo_t *psinfo, char *buf, size_t bufsize)
-{
-	char *path = NULL;
-	int fd;
-
-	buf[0] = '\0';
-
-	if (asprintf(&path, "/proc/%d/lwp/%d/lwpname", (int)psinfo->pr_pid,
-	    (int)psinfo->pr_lwp.pr_lwpid) == -1)
-		return;
-
-	if ((fd = open(path, O_RDONLY)) != -1) {
-		(void) read(fd, buf, bufsize);
-		(void) close(fd);
-	}
-
-	free(path);
-}
-
 /*
  * Print info about the process.
  */
@@ -1487,14 +1469,8 @@ prcom(psinfo_t *psinfo, char *ttyp)
 		(void) printf(" %*d", pidwidth,
 		    (int)psinfo->pr_sid);	/* SID  */
 	}
-	if (Lflg) {
-		char lwpname[THREAD_NAME_MAX] = "";
-
-		get_lwpname(psinfo, lwpname, sizeof (lwpname));
-
-		(void) printf(" %5d %8s", (int)psinfo->pr_lwp.pr_lwpid,
-		    lwpname); /* LWP */
-	}
+	if (Lflg)
+		(void) printf(" %5d", (int)psinfo->pr_lwp.pr_lwpid); /* LWP */
 	if (Pflg) {
 		if (psinfo->pr_lwp.pr_bindpro == PBIND_NONE)	/* PSR */
 			(void) printf("   -");
@@ -1792,8 +1768,22 @@ print_field(psinfo_t *psinfo, struct field *f, const char *ttyp)
 		break;
 	case F_LWPNAME: {
 		char lwpname[THREAD_NAME_MAX] = "";
-		get_lwpname(psinfo, lwpname, sizeof (lwpname));
-		(void) printf("%*s", width, lwpname);
+		char *path = NULL;
+		int fd;
+
+		if (asprintf(&path, "/proc/%d/lwp/%d/lwpname", (int)psinfo->pr_pid,
+		    (int)psinfo->pr_lwp.pr_lwpid) != -1 &&
+		     (fd = open(path, O_RDONLY)) != -1) {
+			(void) read(fd, lwpname, sizeof (lwpname));
+			(void) close(fd);
+		}
+
+		free(path);
+
+		if (f->next != NULL)
+			(void) printf("%-*s", width, lwpname);
+		else
+			(void) printf("%s", lwpname);
 		break;
 	}
 	case F_NLWP:
