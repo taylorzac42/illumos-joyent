@@ -45,7 +45,7 @@ $(__SUNC)CFLAGS=	-xspace -Xa  -xildoff -errtags=yes -errwarn=%all \
 
 
 $(__GNUC)LDLIBS +=	-lc
-$(__GNUC)LDFLAGS= 	$(MAPFILE.NES:%=-Wl,-M%)
+$(__GNUC)LDFLAGS=	$(MAPFILE.NES:%=-Wl,-M%)
 
 $(ROOTONBLDMAN1ONBLDFILES) := FILEMODE=      644
 

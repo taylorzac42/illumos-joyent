@@ -342,6 +342,7 @@ typedef struct {
 } cw_compiler_t;
 
 typedef struct cw_ictx {
+	struct cw_ictx	*i_next;
 	cw_compiler_t	*i_compiler;
 	struct aelist	*i_ae;
 	uint32_t	i_flags;
@@ -1624,12 +1625,15 @@ invoke(cw_ictx_t *ctx)
 		return (0);
 
 	/*
-	 * We must fix up the environment here so that the
-	 * dependency files are not trampled by the shadow compiler.
+	 * We must fix up the environment here so that the dependency files are
+	 * not trampled by the shadow compiler. Also take care of GCC
+	 * environment variables that will throw off gcc. This assumess a
+	 * primary gcc.
 	 */
 	if ((ctx->i_flags & CW_F_SHADOW) &&
 	    (unsetenv("SUNPRO_DEPENDENCIES") != 0 ||
-	    unsetenv("DEPENDENCIES_OUTPUT") != 0)) {
+	    unsetenv("DEPENDENCIES_OUTPUT") != 0 ||
+	    unsetenv("GCC_ROOT") != 0)) {
 		(void) fprintf(stderr, "error: environment setup failed: %s\n",
 		    strerror(errno));
 		return (-1);
@@ -1736,6 +1740,7 @@ exec_ctx(cw_ictx_t *ctx, int block)
 		if (freopen("/dev/fd/2", "w", stderr) == NULL) {
 			err(1, "freopen failed for /dev/fd/2");
 		}
+
 		prepctx(ctx);
 		exit(invoke(ctx));
 	}
@@ -1775,7 +1780,7 @@ parse_compiler(const char *spec, cw_compiler_t *compiler)
 	else if ((strcasecmp(token, "sun") == 0) ||
 	    (strcasecmp(token, "cc") == 0))
 		compiler->c_style = SUN;
- 	else
+	else
 		errx(1, "unknown compiler style: %s", token);
 
 	if (tspec != NULL)
@@ -1856,8 +1861,8 @@ main(int argc, char **argv)
 
 	if (primary.c_path == NULL) {
 		warnx("A primary compiler must be specified");
- 		usage();
- 	}
+		usage();
+	}
 
 	do_serial = (getenv("CW_SHADOW_SERIAL") == NULL) ? B_FALSE : B_TRUE;
 	do_exec = (getenv("CW_NO_EXEC") == NULL) ? B_TRUE : B_FALSE;
@@ -1879,19 +1884,20 @@ main(int argc, char **argv)
 
 	if (cflg) {
 		(void) fputs(primary.c_path, stdout);
- 	}
+	}
 
 	if (vflg) {
 		(void) printf("cw version %s\n", CW_VERSION);
- 		(void) fflush(stdout);
+		(void) fflush(stdout);
 		main_ctx->i_flags &= ~CW_F_ECHO;
 		main_ctx->i_flags |= CW_F_PROG|CW_F_EXEC;
- 		do_serial = 1;
- 	}
+		do_serial = 1;
+	}
 
 	ret |= exec_ctx(main_ctx, do_serial);
 
 	for (int i = 0; i < nshadows; i++) {
+		int r;
 		cw_ictx_t *shadow_ctx;
 
 		if ((shadow_ctx = newictx()) == NULL)
@@ -1902,12 +1908,22 @@ main(int argc, char **argv)
 		shadow_ctx->i_flags |= CW_F_SHADOW;
 		shadow_ctx->i_compiler = &shadows[i];
 
-		/* XXX: Would be nice to run these parallel, too */
-		ret |= exec_ctx(shadow_ctx, 1);
- 	}
+		r = exec_ctx(shadow_ctx, do_serial);
+		if (r == 0) {
+			shadow_ctx->i_next = main_ctx->i_next;
+			main_ctx->i_next = shadow_ctx;
+		}
+		ret |= r;
+	}
 
- 	if (!do_serial)
-		ret |= reap(main_ctx);
+	if (!do_serial) {
+		cw_ictx_t *next = main_ctx;
+		while (next != NULL) {
+			cw_ictx_t *toreap = next;
+			next = next->i_next;
+			ret |= reap(toreap);
+		}
+	}
 
- 	return (ret);
+	return (ret);
 }

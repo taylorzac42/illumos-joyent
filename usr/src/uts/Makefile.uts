@@ -44,7 +44,7 @@ include $(SRC)/Makefile.master
 DTEXTDOM =
 
 #
-# 	Keep references to $(SRC)/common relative.
+#	Keep references to $(SRC)/common relative.
 COMMONBASE=	$(UTSBASE)/../common
 
 #
@@ -184,7 +184,7 @@ LINT_MODULE=	$(MODULE)
 #
 #	Build the compile/assemble lines:
 #
-EXTRA_OPTIONS		= 
+EXTRA_OPTIONS		=
 AS_DEFS			= -D_ASM -D__STDC__=0
 
 ALWAYS_DEFS_32		= -D_KERNEL -D_SYSCALL32 -D_DDI_STRICT
@@ -326,7 +326,7 @@ CTFMERGE_GUDIR_sparc	= sun4u
 CTFMERGE_GUDIR_i386	= intel
 CTFMERGE_GUDIR		= $(CTFMERGE_GUDIR_$(MACH))
 
-CTFMERGE_GENUNIX 	= \
+CTFMERGE_GENUNIX	= \
 	$(UTSBASE)/$(CTFMERGE_GUDIR)/genunix/$(OBJS_DIR)/genunix
 
 #

@@ -40,7 +40,7 @@
 #       checks for changes in ELF runpaths (-r)
 #       build and use this workspace's tools in $SRC/tools (-t)
 #
-# - This file is sourced by "bldenv.sh" and "nightly.sh" and should not 
+# - This file is sourced by "bldenv.sh" and "nightly.sh" and should not
 #   be executed directly.
 # - This script is only interpreted by ksh93 and explicitly allows the
 #   use of ksh93 language extensions.
@@ -61,7 +61,7 @@ function maxjobs
 
 	ncpu=$(builtin getconf ; getconf 'NPROCESSORS_ONLN')
 	(( maxjobs=ncpu + 2 ))
-	
+
 	# Throttle number of parallel jobs launched by dmake to a value which
 	# gurantees that all jobs have enough memory. This was added to avoid
 	# excessive paging/swapping in cases of virtual machine installations
@@ -76,7 +76,7 @@ function maxjobs
 		# the value matched by ([[:digit:]]+), i.e. the amount of
 		# memory installed
 		physical_memory="10#${.sh.match[1]}"
-		
+
 		((
 			max_jobs_per_memory=round(physical_memory/min_mem_per_job) ,
 			maxjobs=fmax(2, fmin(maxjobs, max_jobs_per_memory))

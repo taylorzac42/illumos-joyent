@@ -711,7 +711,7 @@ MAPFILE.INT =		mapfile-intf
 #
 LDLIBS32 =	$(ENVLDLIBS1) $(ENVLDLIBS2) $(ENVLDLIBS3)
 LDLIBS32 +=	$(ADJUNCT_PROTO:%=-L%/usr/lib -L%/lib)
-LDLIBS.cmd = 	$(LDLIBS32)
+LDLIBS.cmd =	$(LDLIBS32)
 LDLIBS.lib =	$(LDLIBS32)
 
 LDLIBS64 =	$(ENVLDLIBS1:%=%/$(MACH64)) \
@@ -804,9 +804,9 @@ SPRO_ROOT=		$(BUILD_TOOLS)/SUNWspro
 SPRO_VROOT=		$(SPRO_ROOT)/SS12
 GNU_ROOT=		/usr
 
-$(__GNUC)PRIMARY_CC=	gcc4,$(GCC_ROOT)/bin/gcc,gnu
+$(__GNUC)PRIMARY_CC=	gcc4,$(GNUC_ROOT)/bin/gcc,gnu
 $(__SUNC)PRIMARY_CC=	studio12,$(SPRO_VROOT)/bin/cc,sun
-$(__GNUC)PRIMARY_CCC=	gcc4,$(GCC_ROOT)/bin/g++,gnu
+$(__GNUC)PRIMARY_CCC=	gcc4,$(GNUC_ROOT)/bin/g++,gnu
 $(__SUNC)PRIMARY_CCC=	studio12,$(SPRO_VROOT)/bin/CC,sun
 
 CW_CC_COMPILERS=	$(PRIMARY_CC:%=--primary %) $(SHADOW_CCS:%=--shadow %)
@@ -926,8 +926,8 @@ C_BIGPICFLAGS64 =	$($(MACH64)_C_BIGPICFLAGS)
 # CC requires there to be no space between '-K' and 'pic' or 'PIC'.
 sparc_CC_PICFLAGS =	-Kpic
 sparcv9_CC_PICFLAGS =	-KPIC
-i386_CC_PICFLAGS = 	-Kpic
-amd64_CC_PICFLAGS = 	-Kpic
+i386_CC_PICFLAGS =	-Kpic
+amd64_CC_PICFLAGS =	-Kpic
 CC_PICFLAGS =		$($(MACH)_CC_PICFLAGS)
 CC_PICFLAGS64 =		$($(MACH64)_CC_PICFLAGS)
 
@@ -987,7 +987,7 @@ CTFCONVERT_O		= $(CTFCONVERT) $(CTFCVTFLAGS) $@
 # The following list of macros are used in the definition of RELEASE_CM
 # which is used to label all binaries in the build:
 #
-# 	RELEASE		Specific release of the build, eg: 5.2
+#	RELEASE		Specific release of the build, eg: 5.2
 #	RELEASE_MAJOR	Major version number part of $(RELEASE)
 #	RELEASE_MINOR	Minor version number part of $(RELEASE)
 #	VERSION		Version of the build (alpha, beta, Generic)
@@ -1014,7 +1014,7 @@ $(RELEASE_BUILD)PROCESS_COMMENT=   @?${MCS} -d -a $(RELEASE_CM)
 STRIP_STABS=			   $(STRIP) -x $@
 $(SRCDBGBLD)STRIP_STABS=	   :
 
-POST_PROCESS_O=	
+POST_PROCESS_O=
 POST_PROCESS_A=
 POST_PROCESS_SO=	$(PROCESS_COMMENT) $@ ; $(STRIP_STABS) ; \
 			$(ELFSIGN_OBJECT)
@@ -1113,8 +1113,8 @@ PKGPUBLISHER_NONREDIST=	on-extra
 # build the catalogue with awk(1).
 
 .sh.po .ksh.po:
-	$(SED) -n -e ":a" 				\
-		  -e "h" 					\
+	$(SED) -n -e ":a"					\
+		  -e "h"					\
 		  -e "s/.*gettext *\(\"[^\"]*\"\).*/\1/p"	\
 		  -e "x"					\
 		  -e "s/\(.*\)gettext *\"[^\"]*\"\(.*\)/\1\2/"	\
