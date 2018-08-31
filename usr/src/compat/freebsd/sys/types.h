@@ -75,10 +75,6 @@ typedef char		vm_memattr_t;
 typedef _Bool bool;
 #endif
 
-#if defined(_KERNEL) && !defined(offsetof)
-#define	offsetof(s, m)	((size_t)(&(((s *)0)->m)))
-#endif
-
 #if defined(_KERNEL)
 typedef struct __dev_info **device_t;
 #endif
