@@ -652,7 +652,11 @@ pci_emul_alloc_pbar(struct pci_devinst *pdi, int idx, uint64_t hostbase,
 		break;
 	default:
 		printf("pci_emul_alloc_base: invalid bar type %d\n", type);
+#ifdef FreeBSD
 		assert(0);
+#else
+		abort();
+#endif
 	}
 
 	if (baseptr != NULL) {
