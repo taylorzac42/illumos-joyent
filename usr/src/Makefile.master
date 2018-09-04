@@ -825,34 +825,29 @@ CW_CCC_COMPILERS=	$(PRIMARY_CCC:%=--primary %) $(SHADOW_CCCS:%=--shadow %)
 #
 CW=			$(ONBLD_TOOLS)/bin/$(MACH)/cw
 
-sparc_CC=		$(CW) $(CW_CC_COMPILERS) --
-sparc_CCC=		$(CW) -C $(CW_CCC_COMPILERS) --
-sparc_CPP=		/usr/ccs/lib/cpp
+BUILD_CC=		$(CW) $(CW_CC_COMPILERS) --
+BUILD_CCC=		$(CW) -C $(CW_CCC_COMPILERS) --
+BUILD_CPP=		/usr/ccs/lib/cpp
+BUILD_LD=		/usr/ccs/bin/ld
+BUILD_LINT=		$(SPRO_ROOT)/sunstudio12.1/bin/lint
+
+$(MACH)_CC=		$(BUILD_CC)
+$(MACH)_CCC=		$(BUILD_CCC)
+$(MACH)_CPP=		$(BUILD_CPP)
+$(MACH)_LD=		$(BUILD_LD)
+$(MACH)_LINT=		$(BUILD_LINT)
+$(MACH64)_CC=		$(BUILD_CC)
+$(MACH64)_CCC=		$(BUILD_CCC)
+$(MACH64)_CPP=		$(BUILD_CPP)
+$(MACH64)_LD=		$(BUILD_LD)
+$(MACH64)_LINT=		$(BUILD_LINT)
+
 sparc_AS=		/usr/ccs/bin/as -xregsym=no
-sparc_LD=		/usr/ccs/bin/ld
-sparc_LINT=		$(SPRO_ROOT)/sunstudio12.1/bin/lint
+sparcv9_AS=		$($(MACH)_AS)
 
-sparcv9_CC=		$(CW) $(CW_CC_COMPILERS) --
-sparcv9_CCC=		$(CW) -C $(CW_CCC_COMPILERS) --
-sparcv9_CPP=		/usr/ccs/lib/cpp
-sparcv9_AS=		/usr/ccs/bin/as -xregsym=no
-sparcv9_LD=		/usr/ccs/bin/ld
-sparcv9_LINT=		$(SPRO_ROOT)/sunstudio12.1/bin/lint
-
-i386_CC=		$(CW) $(CW_CC_COMPILERS) --
-i386_CCC=		$(CW) -C $(CW_CCC_COMPILERS) --
-i386_CPP=		/usr/ccs/lib/cpp
 i386_AS=		/usr/ccs/bin/as
 $(__GNUC)i386_AS=	$(ONBLD_TOOLS)/bin/$(MACH)/aw
-i386_LD=		/usr/ccs/bin/ld
-i386_LINT=		$(SPRO_ROOT)/sunstudio12.1/bin/lint
-
-amd64_CC=		$(CW) $(CW_CC_COMPILERS) --
-amd64_CCC=		$(CW) -C $(CW_CCC_COMPILERS) --
-amd64_CPP=		/usr/ccs/lib/cpp
 amd64_AS=		$(ONBLD_TOOLS)/bin/$(MACH)/aw
-amd64_LD=		/usr/ccs/bin/ld
-amd64_LINT=		$(SPRO_ROOT)/sunstudio12.1/bin/lint
 
 NATIVECC=		$($(NATIVE_MACH)_CC)
 NATIVECCC=		$($(NATIVE_MACH)_CCC)

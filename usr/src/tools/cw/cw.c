@@ -1627,8 +1627,8 @@ invoke(cw_ictx_t *ctx)
 	/*
 	 * We must fix up the environment here so that the dependency files are
 	 * not trampled by the shadow compiler. Also take care of GCC
-	 * environment variables that will throw off gcc. This assumess a
-	 * primary gcc.
+	 * environment variables that will throw off gcc. This assumes a primary
+	 * gcc.
 	 */
 	if ((ctx->i_flags & CW_F_SHADOW) &&
 	    (unsetenv("SUNPRO_DEPENDENCIES") != 0 ||
@@ -1755,7 +1755,7 @@ exec_ctx(cw_ictx_t *ctx, int block)
 	return (0);
 }
 
-static int
+static void
 parse_compiler(const char *spec, cw_compiler_t *compiler)
 {
 	char *tspec, *token;
@@ -1785,8 +1785,6 @@ parse_compiler(const char *spec, cw_compiler_t *compiler)
 
 	if (tspec != NULL)
 		errx(1, "Excess tokens in compiler: %s", spec);
-
-	return (0);
 }
 
 int
@@ -1837,17 +1835,13 @@ main(int argc, char **argv)
 				usage();
 			}
 
-			if (parse_compiler(optarg, &primary) != 0)
-				errx(1, "Couldn't parse %s as a compiler spec",
-				    optarg);
+			parse_compiler(optarg, &primary);
 			break;
 		case 's':
 			if (nshadows >= 10)
 				errx(1, "May only use 10 shadows at "
 				    "the moment");
-			if (parse_compiler(optarg, &shadows[nshadows]) != 0)
-				errx(1, "Couldn't parse %s as a compiler spec",
-				    optarg);
+			parse_compiler(optarg, &shadows[nshadows]);
 			nshadows++;
 			break;
 		case 'v':
@@ -1890,7 +1884,7 @@ main(int argc, char **argv)
 		(void) printf("cw version %s\n", CW_VERSION);
 		(void) fflush(stdout);
 		main_ctx->i_flags &= ~CW_F_ECHO;
-		main_ctx->i_flags |= CW_F_PROG|CW_F_EXEC;
+		main_ctx->i_flags |= CW_F_PROG | CW_F_EXEC;
 		do_serial = 1;
 	}
 

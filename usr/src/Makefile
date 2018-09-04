@@ -25,7 +25,7 @@
 # Copyright 2014 Garrett D'Amore <garrett@damore.org>
 # Copyright 2015 OmniTI Computer Consulting, Inc. All rights reserved.
 # Copyright 2016 Toomas Soome <tsoome@me.com>
-# Copyright 2017 Joyent, Inc.
+# Copyright 2018 Joyent, Inc.
 # Copyright 2018 OmniOS Community Edition (OmniOSce) Association.
 #
 
@@ -240,19 +240,12 @@ cscope.out tags: FRC
 
 FRC:
 
-#
-# Targets for reporting compiler versions; nightly uses these.
-#
-
+# used by nightly
 cc-version:
-	@$(ECHO) 32-bit compiler;			\
-	$(ECHO) $($(MACH)_CC);				\
-	$(CW) --versions $(CW_CC_COMPILERS) 2>&1
+	@$(CW) --versions $(CW_CC_COMPILERS) 2>&1
 
+# for older nightlies
 cc64-version:
-	@$(ECHO) 64-bit compiler;			\
-	$(ECHO) $($(MACH)_CC);				\
-	$(CW) --versions $(CW_CC_COMPILERS) 2>&1
 
 java-version:
 	@if [ -x "$(JAVAC)" ]; then			\

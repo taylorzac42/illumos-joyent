@@ -22,6 +22,7 @@
 # Copyright 2007 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
+# Copyright 2018 Joyent, Inc.
 
 PROG	= cw
 
@@ -40,8 +41,8 @@ CFLAGS += $(CCVERBOSE)
 # Override CFLAGS.  This is needed only for bootstrap of cw.
 $(__GNUC)CFLAGS=	-O -D__sun -Wall -Wno-unknown-pragmas -Werror \
 			-std=gnu99 -nodefaultlibs
-$(__SUNC)CFLAGS=	-xspace -Xa  -xildoff -errtags=yes -errwarn=%all \
-			-xc99=%all   -W0,-xglobalstatic -v
+$(__SUNC)CFLAGS=	-xspace -Xa -xildoff -errtags=yes -errwarn=%all \
+			-xc99=%all -W0,-xglobalstatic -v
 
 
 $(__GNUC)LDLIBS +=	-lc
@@ -61,5 +62,10 @@ install: all .WAIT $(ROOTONBLDMACHPROG) $(ROOTONBLDMAN1ONBLDFILES)
 lint: lint_PROG
 
 clean:
+
+#
+# Not run by default: bootstrap...
+check:
+	$(ROOTONBLDBINMACH)/mandoc -Tlint -Wwarning $(MAN1ONBLDFILES)
 
 include ../Makefile.targ

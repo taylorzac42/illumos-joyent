@@ -21,7 +21,9 @@
 .\" Copyright 2010 Sun Microsystems, Inc.  All rights reserved.
 .\" Use is subject to license terms.
 .\"
-.Dd August 31, 2018
+.\" Copyright 2018 Joyent, Inc.
+.\"
+.Dd September 4, 2018
 .Dt CW 1ONBLD
 .Os
 .Sh NAME
@@ -43,7 +45,7 @@ Sun style arguments as appropriate.
 This allows the use of arbitrary compilers without the need to alter large
 numbers of makefiles.
 A mode called shadow compilation invokes multiple compilers so that warnings
-and errors may be obtained from both.
+and errors may be obtained from all of them.
 See
 .Sx SHADOW COMPILATION
 for details.
@@ -131,7 +133,7 @@ If
 .Fl -shadow
 compilers are specified
 .Nm cw
-will invoke shadow compiler, with the outputs modified (as well as any
+will invoke each shadow compiler, with the outputs modified (as well as any
 translation for compiler style) as follows:
 .Bl -enum
 .It
@@ -200,7 +202,7 @@ This is useful for debugging the translation engine.
 The following exit status values are returned:
 .Bl -tag -width indent
 .It 0
-The primary compiler, and shadow compilers if invoked, both completed
+The primary compiler, and shadow compilers if invoked, all completed
 successfully.
 .It >0
 A usage error occurred, or one or more compilers returned a nonzero
