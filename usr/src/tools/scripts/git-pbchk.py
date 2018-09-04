@@ -371,39 +371,42 @@ def pbchk(root, parent, paths):
 
 def main(cmd, args):
     parent_branch = None
-    funcname = None
+    checkname = None
 
     try:
-        opts, args = getopt.getopt(args, 'b:f:')
+        opts, args = getopt.getopt(args, 'c:p:')
     except getopt.GetoptError, e:
         sys.stderr.write(str(e) + '\n')
-        sys.stderr.write("Usage: %s [-b branch] [-f check] [path...]\n" % cmd)
+        sys.stderr.write("Usage: %s [-c check] [-p branch] [path...]\n" % cmd)
         sys.exit(1)
 
     for opt, arg in opts:
+        # backwards compatibility
         if opt == '-b':
             parent_branch = arg
-        elif opt == '-f':
-            funcname = arg
+        elif opt == '-c':
+            checkname = arg
+        elif opt == '-p':
+            parent_branch = arg
 
     if not parent_branch:
         parent_branch = git_parent_branch(git_branch())
 
-    if funcname is None:
+    if checkname is None:
         if cmd == 'git-pbchk':
-            funcname= 'pbchk'
+            checkname= 'pbchk'
         else:
-            funcname = 'nits'
+            checkname = 'nits'
 
-    if funcname == 'pbchk':
+    if checkname == 'pbchk':
         if args:
             sys.stderr.write("only complete workspaces may be pbchk'd\n");
             sys.exit(1)
         pbchk(git_root(), parent_branch, None)
-    elif funcname == 'nits':
-        nits(git_root(), parent_branch, [func], args)
+    elif checkname == 'nits':
+        nits(git_root(), parent_branch, args)
     else:
-        run_checks(git_root(), parent_branch, [eval(funcname)], args)
+        run_checks(git_root(), parent_branch, [eval(checkname)], args)
 
 if __name__ == '__main__':
     try:
