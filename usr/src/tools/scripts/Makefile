@@ -116,9 +116,6 @@ EXCEPTFILES= \
 
 CLEANFILES = $(SHFILES) $(PERLFILES) $(PYFILES) bldenv.1onbld onu.sh
 
-onu.sh:	onu.sh.in
-	$(SED) -e "s:@PYTHON_VERSION@:$(PYTHON_VERSION):g" < onu.sh.in > $@
-
 include ../Makefile.tools
 
 ROOTONBLDSCRIPTLINKS = $(SCRIPTLINKS:%=$(ROOTONBLDBIN)/%)
@@ -134,6 +131,9 @@ $(ROOTONBLDMAN1ONBLDFILES)	:= FILEMODE=	644
 
 all:	$(SHFILES) $(PERLFILES) $(PERLMODULES) $(PYFILES) \
 	$(MAN1ONBLDFILES) $(MAKEFILES)
+
+onu.sh:	onu.sh.in
+	$(SED) -e "s:@PYTHON_VERSION@:$(PYTHON_VERSION):g" < onu.sh.in > $@
 
 $(ROOTONBLDBIN)/git-nits:
 	$(RM) $(ROOTONBLDBIN)/git-nits
@@ -165,13 +165,19 @@ bldenv.1onbld: bldenv
 	$(RM) "$@"
 	(set +o errexit ; ksh93 $? --nroff ; true) 2>&1 | \
 	sed -e 's/\.DS/.nf/g;s/\.DE/.fi/' \
-	-e 's/\.TH BLDENV 1/.TH BLDENV 1ONBLD/' \
+	-e 's/\.TH BLDENV 1/.TH BLDENV 1ONBLD "September 4, 2018"/' \
+	-e 's/.OP \([a-z]\) - flag -/.OP \\-\1/g' \
 	-e 's/(1)/(1ONBLD)/' > "$@"
 
 nightly: nightly.sh stdenv.sh
 	$(RM) "$@"
 	sed -e '/# STDENV_START/ r stdenv.sh' nightly.sh > nightly
 	$(CHMOD) +x "$@"
+
+#
+# Not run by default: bootstrap...
+check:
+	$(ROOTONBLDBINMACH)/mandoc -Tlint -Wwarning $(MAN1ONBLDFILES)
 
 include ../Makefile.targ
 
