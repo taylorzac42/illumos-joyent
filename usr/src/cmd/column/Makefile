@@ -19,24 +19,26 @@
 #
 # CDDL HEADER END
 #
-#
-# Copyright (c) 2013 Joyent, Inc.  All rights reserved.
-# Use is subject to license terms.
+# Copyright 2018 Joyent, Inc.
 #
 
 PROG=column
+OBJS=column.o
 
 include ../Makefile.cmd
-
-CFLAGS += $(CCVERBOSE)
 
 .KEEP_STATE:
 
 all: $(PROG)
 
-install: all $(ROOTPROG)
+$(PROG): $(OBJS)
+	$(LINK.c) -o $@ $(OBJS) $(LDLIBS)
+	$(POST_PROCESS)
+
+install: all $(ROOTBINPROG)
 
 clean:
+	$(RM) $(OBJS)
 
 lint:	lint_PROG
 

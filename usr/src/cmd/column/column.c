@@ -30,12 +30,6 @@
  * Portions Copyright (c) 2013  Joyent, Inc.  All rights reserved.
  */
 
-#ifndef lint
-static const char copyright[] =
-"@(#) Copyright (c) 1989, 1993, 1994\n\
-	The Regents of the University of California.  All rights reserved.\n";
-#endif
-
 #include <sys/types.h>
 #include <sys/ioctl.h>
 #include <sys/param.h>
