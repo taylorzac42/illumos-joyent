@@ -34,9 +34,15 @@
 
 #define	Z_BUFSIZE 2048	/* XXX larger? */
 
+struct z_cache {
+	char	*zc_name;
+	off_t	zc_size;
+};
+
 struct z_file
 {
 	int		zf_rawfd;
+	off_t		zf_size;
 	off_t		zf_dataoffset;
 	z_stream	zf_zstream;
 	unsigned char	zf_buf[Z_BUFSIZE];
@@ -209,6 +215,7 @@ zf_open(const char *fname, struct open_file *f)
 		return (ENOMEM);
 	bzero(zf, sizeof (struct z_file));
 	zf->zf_rawfd = rawfd;
+	zf->zf_size = -1;
 
 	/* Verify that the file is gzipped */
 	if (check_header(zf)) {
@@ -341,17 +348,23 @@ zf_stat(struct open_file *f, struct stat *sb)
 	if ((result = fstat(zf->zf_rawfd, sb)) == 0) {
 		if (sb->st_size == -1)
 			return (result);
-		pos1 = lseek(zf->zf_rawfd, 0, SEEK_CUR);
-		pos2 = lseek(zf->zf_rawfd, sb->st_size - 4, SEEK_SET);
-		if (pos2 != -1) {
-			if (read(zf->zf_rawfd, &size, 4) == 4)
-				sb->st_size = (off_t)size;
-			else
+		if (zf->zf_size == -1) {
+			pos1 = lseek(zf->zf_rawfd, 0, SEEK_CUR);
+			pos2 = lseek(zf->zf_rawfd, sb->st_size - 4, SEEK_SET);
+			if (pos2 != -1) {
+				if (read(zf->zf_rawfd, &size, 4) == 4)
+					sb->st_size = (off_t)size;
+				else
+					sb->st_size = -1;
+			} else
 				sb->st_size = -1;
-		} else
-			sb->st_size = -1;
+			pos1 = lseek(zf->zf_rawfd, pos1, SEEK_SET);
+			zf->zf_size = sb->st_size;
+		} else {
+			sb->st_size = zf->zf_size;
+printf("using cached size: %jd\n", (uintmax_t)sb->st_size);
+		}
 
-		pos1 = lseek(zf->zf_rawfd, pos1, SEEK_SET);
 	}
 	return (result);
 }
