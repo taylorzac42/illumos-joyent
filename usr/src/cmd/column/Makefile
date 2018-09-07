@@ -35,7 +35,7 @@ $(PROG): $(OBJS)
 	$(LINK.c) -o $@ $(OBJS) $(LDLIBS)
 	$(POST_PROCESS)
 
-install: all $(ROOTBINPROG)
+install: all $(ROOTPROG)
 
 clean:
 	$(RM) $(OBJS)
