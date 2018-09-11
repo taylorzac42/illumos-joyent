@@ -1247,6 +1247,8 @@ $(LIB_PIC): pics $$(PICS)
 	$(AR) -ts $@ > /dev/null
 	$(POST_PROCESS_A)
 
+GENASSYM_C = $(LIBCDIR)/$(MACH64)/genassym.c
+
 ASSYMDEP_OBJS=			\
 	_lwp_mutex_unlock.o	\
 	_stack_grow.o		\

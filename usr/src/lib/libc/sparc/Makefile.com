@@ -1411,6 +1411,8 @@ $(ASSYMDEP_OBJS:%=pics/%): assym.h
 
 assym.h := CFLAGS += -g
 
+GENASSYM_C = $(LIBCDIR)/$(MACH)/genassym.c
+
 # derived C source and related explicit dependencies
 $(LIBCDIR)/port/gen/errlst.c + \
 $(LIBCDIR)/port/gen/new_list.c: $(LIBCDIR)/port/gen/errlist $(LIBCDIR)/port/gen/errlist.awk

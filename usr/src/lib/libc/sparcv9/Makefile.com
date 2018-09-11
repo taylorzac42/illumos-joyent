@@ -1325,6 +1325,8 @@ $(ASSYMDEP_OBJS:%=pics/%): assym.h
 
 assym.h := CFLAGS64 += -g
 
+GENASSYM_C = $(LIBCDIR)/$(MACH)/genassym.c
+
 # derived C source and related explicit dependencies
 $(LIBCDIR)/port/gen/new_list.c: $(LIBCDIR)/port/gen/errlist $(LIBCDIR)/port/gen/errlist.awk
 	cd $(LIBCDIR)/port/gen; pwd; $(AWK) -f errlist.awk < errlist

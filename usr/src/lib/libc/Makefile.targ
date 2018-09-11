@@ -320,8 +320,6 @@ pics/%.o: $(LIBCBASE)/../port/threads/%.d $(THREADSOBJS:%=pics/%)
 
 # assym rules
 
-GENASSYM_C = $(LIBCDIR)/$(MACH)/genassym.c
-
 #
 # genassym is a funny fish: it's run on the build machine, so should use the
 # native compilers, but its job is to reflect the proto area header definitions,
@@ -331,10 +329,11 @@ GENASSYM_C = $(LIBCDIR)/$(MACH)/genassym.c
 genassym: $(GENASSYM_C)
 	$(NATIVECC) $(NATIVE_CFLAGS) $(CPPFLAGS) -o $@ $(GENASSYM_C)
 
+# shared between 32- and 64-bit
 OFFSETS = $(LIBCDIR)/$(MACH)/offsets.in
 
-assym.h: $(OFFSETS) $(LIBCDIR)/$(MACH)/genassym
+assym.h: $(OFFSETS) genassym
 	$(OFFSETS_CREATE) <$(OFFSETS) >$@
-	$(LIBCDIR)/$(MACH)/genassym >>$@
+	./genassym >>$@
 
 include $(SRC)/lib/Makefile.targ
