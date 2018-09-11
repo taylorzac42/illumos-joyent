@@ -60,7 +60,7 @@ CHKHDRSUBDIRS=	head uts lib
 #
 # Headers that can be built in parallel
 #
-PARALLEL_HEADERS = sysheaders userheaders libheaders ucbheaders cmdheaders
+PARALLEL_HEADERS = userheaders libheaders ucbheaders cmdheaders
 
 #
 # Directories that can be built in parallel
@@ -212,7 +212,7 @@ $(ROOTDIRS) $(MSGDIRS):
 userheaders: FRC
 	@cd head; pwd; $(MAKE) install_h
 
-libheaders: bldtools
+libheaders: bldtools sysheaders
 	@cd lib; pwd; $(MAKE) install_h
 
 sysheaders: FRC
