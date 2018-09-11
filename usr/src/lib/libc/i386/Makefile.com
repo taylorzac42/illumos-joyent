@@ -1335,11 +1335,11 @@ ASSYMDEP_OBJS=			\
 	tls_get_addr.o		\
 	vforkx.o
 
-GENASSYM_C = $(LIBCDIR)/$(MACH)/genassym.c
-
 $(ASSYMDEP_OBJS:%=pics/%)	:=	CPPFLAGS += -I.
 
 $(ASSYMDEP_OBJS:%=pics/%): assym.h
+
+GENASSYM_C = $(LIBCDIR)/$(MACH)/genassym.c
 
 # derived C source and related explicit dependencies
 $(LIBCDIR)/port/gen/errlst.c + \
