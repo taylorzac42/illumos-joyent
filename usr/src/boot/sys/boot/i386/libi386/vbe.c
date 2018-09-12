@@ -509,7 +509,7 @@ vbe_dump_mode(int modenum, struct modeinfoblock *mi)
 static int
 vbe_get_edid(int *pwidth, int *pheight)
 {
-	struct vesa_edid_info edid_info;
+	struct vesa_edid_info *edid_info;
 	const uint8_t magic[] = EDID_MAGIC;
 	int ddc_caps, ret;
 
@@ -518,25 +518,38 @@ vbe_get_edid(int *pwidth, int *pheight)
 		return (1);
 	}
 
-	ret = biosvbe_ddc_read_edid(0, &edid_info);
-	if (VBE_ERROR(ret))
+	edid_info = bio_alloc(sizeof (*edid_info));
+	if (edid_info == NULL)
 		return (1);
 
-	if (memcmp(&edid_info, magic, sizeof(magic)) != 0)
-		return (1);
+	ret = biosvbe_ddc_read_edid(0, edid_info);
+	if (VBE_ERROR(ret)) {
+		ret = 1;
+		goto done;
+	}
 
-	if (!(edid_info.header.version == 1 &&
-	    (edid_info.display.supported_features
+	if (memcmp(&edid_info, magic, sizeof(magic)) != 0) {
+		ret = 1;
+		goto done;
+	}
+
+	if (!(edid_info->header.version == 1 &&
+	    (edid_info->display.supported_features
 	    & EDID_FEATURE_PREFERRED_TIMING_MODE) &&
-	    edid_info.detailed_timings[0].pixel_clock))
-		return (1);
+	    edid_info->detailed_timings[0].pixel_clock)) {
+		ret = 1;
+		goto done;
+	}
 
-	*pwidth = edid_info.detailed_timings[0].horizontal_active_lo |
-	    (((int)edid_info.detailed_timings[0].horizontal_hi & 0xf0) << 4);
-	*pheight = edid_info.detailed_timings[0].vertical_active_lo |
-	    (((int)edid_info.detailed_timings[0].vertical_hi & 0xf0) << 4);
+	*pwidth = edid_info->detailed_timings[0].horizontal_active_lo |
+	    (((int)edid_info->detailed_timings[0].horizontal_hi & 0xf0) << 4);
+	*pheight = edid_info->detailed_timings[0].vertical_active_lo |
+	    (((int)edid_info->detailed_timings[0].vertical_hi & 0xf0) << 4);
+	ret = 0;
 
-	return (0);
+done:
+	bio_free(edid_info, sizeof (*edid_info));
+	return (ret);
 }
 
 static void
