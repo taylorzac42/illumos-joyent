@@ -446,8 +446,6 @@ typedef struct viona_vring {
 		uint64_t	rs_too_short;
 		uint64_t	rs_tx_absent;
 
-		uint64_t	rs_bad_tx_frame;
-
 		uint64_t	rs_rx_hookdrop;
 		uint64_t	rs_tx_hookdrop;
 	} vr_stats;
@@ -491,8 +489,7 @@ struct viona_neti {
 	netid_t			vni_netid;
 	zoneid_t		vni_zid;
 
-	viona_nethook_t		vni_nhv4;
-	viona_nethook_t		vni_nhv6;
+	viona_nethook_t		vni_nethook;
 
 	kmutex_t		vni_lock;	/* Protects remaining members */
 	kcondvar_t		vni_ref_change; /* Protected by vni_lock */
@@ -542,13 +539,6 @@ static net_instance_t		*viona_neti;
  * transmission to free resources.
  */
 static boolean_t		viona_force_copy_tx_mblks = B_FALSE;
-
-/*
- * Constants for viona net hooks
- */
-static uint8_t viona_bcast_addr[6] = { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF };
-static uint8_t viona_ipv4_mcast[3] = { 0x01, 0x000, 0x5E };
-static uint8_t viona_ipv6_mcast[2] = { 0x33, 0x33 };
 
 static int viona_info(dev_info_t *dip, ddi_info_cmd_t cmd, void *arg,
     void **result);
@@ -1006,7 +996,7 @@ viona_ioc_create(viona_soft_state_t *ss, void *dptr, int md, cred_t *cr)
 		return (EIO);
 	}
 
-	if (!nip->vni_nhv4.vnh_hooked || !nip->vni_nhv6.vnh_hooked) {
+	if (!nip->vni_nethook.vnh_hooked) {
 		viona_neti_rele(nip);
 		return (EIO);
 	}
@@ -2222,8 +2212,6 @@ viona_rx(void *arg, mac_resource_handle_t mrh, mblk_t *mp, boolean_t loopback)
 	mblk_t *mpdrop = NULL, **mpdrop_prevp = &mpdrop;
 	const boolean_t do_merge =
 	    ((link->l_features & VIRTIO_NET_F_MRG_RXBUF) != 0);
-	const boolean_t hooked = link->l_neti->vni_nhv4.vnh_hooked ||
-	    link->l_neti->vni_nhv6.vnh_hooked;
 	size_t nrx = 0, ndrop = 0;
 
 	while (mp != NULL) {
@@ -2235,7 +2223,7 @@ viona_rx(void *arg, mac_resource_handle_t mrh, mblk_t *mp, boolean_t loopback)
 		mp->b_next = NULL;
 		size = msgsize(mp);
 
-		if (hooked && (err = viona_hook(link, ring, &mp, B_FALSE)) != 0)
+		if ((err = viona_hook(link, ring, &mp, B_FALSE)) != 0)
 			goto pad_drop;
 
 		/*
@@ -2416,91 +2404,6 @@ viona_mb_get_uint8(mblk_t *mp, off_t off, uint8_t *out)
 	return (0);
 }
 
-/*
- * Read the 16-bit value at off and write it (in local byte order) into *out.
- * Return 0 on success or 1 if 'off' is out of range.
- */
-static int
-viona_mb_get_uint16(mblk_t *mp, off_t off, uint16_t *out)
-{
-	uint8_t *bp;
-	size_t mpsize;
-
-	mpsize = MBLKL(mp);
-	while (off >= mpsize) {
-		if ((mp = mp->b_cont) == NULL)
-			return (1);
-		off -= mpsize;
-		mpsize = MBLKL(mp);
-	}
-
-	bp = mp->b_rptr + off;
-	*out = *bp << 8;
-
-	/*
-	 * While unfortunate, it's possible the value is split between two
-	 * mblks.  It's also possible (but also unfortunate) that we might
-	 * have 0-length mblks in the mix.
-	 */
-	if (off + 1 == mpsize) {
-		do {
-			if ((mp = mp->b_cont) == NULL)
-				return (1);
-			mpsize = MBLKL(mp);
-		} while (mpsize == 0);
-
-		bp = mp->b_rptr;
-	} else {
-		bp++;
-	}
-
-	*out |= *bp;
-	return (0);
-}
-
-/*
- * Return a pointer to the destination MAC address.  If the address is
- * not in the first mblk_t, copy the address to datap and return datap.
- * If we have a runt (i.e. mblk_t is less than 6 bytes), return NULL.
- */
-static uint8_t *
-viona_mb_getdstmac(mblk_t *mp, uint8_t *datap)
-{
-	if (MBLKL(mp) >= ETHERADDRL)
-		return (mp->b_rptr);
-
-	uint8_t *p = datap;
-	off_t i;
-
-	for (i = 0; i < ETHERADDRL; i++, p++) {
-		if (viona_mb_get_uint8(mp, i, p) != 0)
-			return (NULL);
-	}
-
-	return (datap);
-}
-
-/*
- * Given an mblk chain, find the mblk and address of a particular offset.
- */
-static int
-viona_mb_getoffset(mblk_t *mp, off_t off, mblk_t **mpp, uintptr_t *offp)
-{
-	size_t mpsize;
-
-	mpsize = MBLKL(mp);
-	while (off >= mpsize) {
-		if ((mp = mp->b_cont) == NULL)
-			return (1);
-		off -= mpsize;
-		mpsize = MBLKL(mp);
-	}
-	*mpp = mp;
-	*offp = (uintptr_t)mp->b_rptr + off;
-
-	return (0);
-}
-
 static boolean_t
 viona_tx_csum(viona_vring_t *ring, const struct virtio_net_hdr *hdr,
     mblk_t *mp, uint32_t len)
@@ -2604,8 +2507,6 @@ viona_tx(viona_link_t *link, viona_vring_t *ring)
 	viona_desb_t		*dp = NULL;
 	mac_client_handle_t	link_mch = link->l_mch;
 	const struct virtio_net_hdr *hdr;
-	const boolean_t hooked = link->l_neti->vni_nhv4.vnh_hooked ||
-	    link->l_neti->vni_nhv6.vnh_hooked;
 
 	mp_head = mp_tail = NULL;
 
@@ -2722,7 +2623,7 @@ viona_tx(viona_link_t *link, viona_vring_t *ring)
 		mp_tail = mp;
 	}
 
-	if (hooked && viona_hook(link, ring, &mp_head, B_TRUE) != 0)
+	if (viona_hook(link, ring, &mp_head, B_TRUE) != 0)
 		goto drop_fail;
 
 	/* Request hardware checksumming, if necessary */
@@ -2807,54 +2708,12 @@ drop_fail:
 static int
 viona_hook(viona_link_t *link, viona_vring_t *ring, mblk_t **mpp, boolean_t out)
 {
-	const char *reason = NULL;
 	viona_neti_t *nip = link->l_neti;
-	viona_nethook_t *vnh = NULL;
-	size_t offset, len, minlen;
-	uint8_t *dstp;
-	uint8_t dstaddr[ETHERADDRL];
+	viona_nethook_t *vnh = &nip->vni_nethook;
 	hook_pkt_event_t info;
 	hook_event_t he;
 	hook_event_token_t het;
 	int ret;
-	uint16_t etype;
-
-	/* Byte 12 is either the VLAN tag or the ethertype */
-	if (viona_mb_get_uint16(*mpp, 12, &etype) != 0) {
-		reason = "packet has incomplete ethernet header";
-		goto drop;
-	}
-
-	if (etype == ETHERTYPE_VLAN) {
-		if (viona_mb_get_uint16(*mpp, 16, &etype) != 0) {
-			reason = "packet has incomplete ethernet vlan header";
-			goto drop;
-		}
-		offset = sizeof (struct ether_vlan_header);
-	} else {
-		offset = sizeof (struct ether_header);
-	}
-
-	len = msgsize(*mpp) - offset;
-
-	/*
-	 * At the moment, we only hook on the kinds of things that the IP
-	 * module would normally.
-	 */
-	switch (etype) {
-	case ETHERTYPE_IP:
-		vnh = &nip->vni_nhv4;
-		minlen = IP_SIMPLE_HDR_LENGTH;
-		reason = "packet has incomplete IP header";
-		break;
-	case ETHERTYPE_IPV6:
-		vnh = &nip->vni_nhv6;
-		minlen = IPV6_HDR_LEN;
-		reason = "packet has incomplete IPv6 header";
-		break;
-	default:
-		return (0);
-	}
 
 	he = out ? vnh->vnh_event_out : vnh->vnh_event_in;
 	het = out ? vnh->vnh_token_out : vnh->vnh_token_in;
@@ -2862,67 +2721,37 @@ viona_hook(viona_link_t *link, viona_vring_t *ring, mblk_t **mpp, boolean_t out)
 	if (!he.he_interested)
 		return (0);
 
-	if (len < minlen)
-		goto drop;
-
-	if ((dstp = viona_mb_getdstmac(*mpp, dstaddr)) == NULL) {
-		reason = "packet has incomplete ethernet header";
-		goto drop;
-	}
-
 	info.hpe_protocol = vnh->vnh_neti;
 	info.hpe_ifp = (phy_if_t)link;
 	info.hpe_ofp = (phy_if_t)link;
 	info.hpe_mp = mpp;
 	info.hpe_flags = 0;
 
-	if (bcmp(viona_bcast_addr, dstp, ETHERADDRL) == 0)
-		info.hpe_flags |= HPE_BROADCAST;
-	else if (etype == ETHERTYPE_IP &&
-	    bcmp(viona_ipv4_mcast, viona_bcast_addr,
-	    sizeof (viona_ipv4_mcast)) == 0)
-		info.hpe_flags |= HPE_MULTICAST;
-	else if (etype == ETHERTYPE_IPV6 &&
-	    bcmp(viona_ipv6_mcast, viona_bcast_addr,
-	    sizeof (viona_ipv6_mcast) == 0))
-		info.hpe_flags |= HPE_MULTICAST;
-
-	if (viona_mb_getoffset(*mpp, offset, &info.hpe_mb,
-	    (uintptr_t *)&info.hpe_hdr) != 0) {
-		reason = "packet too small -- unable to find payload";
-		goto drop;
-	}
-
 	ret = hook_run(vnh->vnh_neti->netd_hooks, het, (hook_data_t)&info);
-	if (ret != 0) {
-		if (out) {
-			VIONA_PROBE2(tx_hook_drop, viona_vring_t *, ring,
-			    mblk_t *, *mpp);
-			VIONA_RING_STAT_INCR(ring, tx_hookdrop);
-		} else {
-			VIONA_PROBE2(rx_hook_drop, viona_vring_t *, ring,
-			    mblk_t *, *mpp);
-			VIONA_RING_STAT_INCR(ring, rx_hookdrop);
-		}
-		return (ret);
-	}
-	return (0);
+	if (ret == 0)
+		return (0);
 
-drop:
 	if (out) {
-		VIONA_PROBE3(tx_drop_badframe, viona_vring_t *, ring,
-		    mblk_t *, *mpp, const char *, reason);
-		VIONA_RING_STAT_INCR(ring, bad_tx_frame);
+		VIONA_PROBE2(tx_hook_drop, viona_vring_t *, ring,
+		    mblk_t *, *mpp);
+		VIONA_RING_STAT_INCR(ring, tx_hookdrop);
 	} else {
-		VIONA_PROBE3(rx_drop_badframe, viona_vring_t *, ring,
-		    mblk_t *, *mpp, const char *, reason);
-		VIONA_RING_STAT_INCR(ring, bad_rx_frame);
+		VIONA_PROBE2(rx_hook_drop, viona_vring_t *, ring,
+		    mblk_t *, *mpp);
+		VIONA_RING_STAT_INCR(ring, rx_hookdrop);
 	}
-	/* XXX: EINVAL might also be a suitable error message for this */
-	return (EBADMSG);
+	return (ret);
 }
 
-/* netinfo stubs - required by the nethook framework, but otherwise unused */
+/*
+ * netinfo stubs - required by the nethook framework, but otherwise unused
+ *
+ * Currently, all ipf rules are applied against all interfaces in a given
+ * netstack (e.g. all interfaces in a zone).  In the future if we want to
+ * support being able to apply different rules to different interfaces, I
+ * believe we would need to implement some of these stubs to map an interface
+ * name in a rule (e.g. 'net0', back to an index or viona_link_t);
+ */
 static int
 viona_neti_getifname(net_handle_t neti __unused, phy_if_t phy __unused,
     char *buf __unused, const size_t len __unused)
@@ -3010,27 +2839,9 @@ viona_neti_isvchksum(net_handle_t neti __unused, mblk_t *mp __unused)
 	return (-1);
 }
 
-static net_protocol_t viona_neti_v4 = {
+static net_protocol_t viona_netinfo = {
 	NETINFO_VERSION,
-	NHF_VIONA_INET,
-	viona_neti_getifname,
-	viona_neti_getmtu,
-	viona_neti_getptmue,
-	viona_neti_getlifaddr,
-	viona_neti_getlifzone,
-	viona_neti_getlifflags,
-	viona_neti_phygetnext,
-	viona_neti_phylookup,
-	viona_neti_lifgetnext,
-	viona_neti_inject,
-	viona_neti_route,
-	viona_neti_ispchksum,
-	viona_neti_isvchksum
-};
-
-static net_protocol_t viona_neti_v6 = {
-	NETINFO_VERSION,
-	NHF_VIONA_INET6,
+	NHF_VIONA,
 	viona_neti_getifname,
 	viona_neti_getmtu,
 	viona_neti_getptmue,
@@ -3047,8 +2858,7 @@ static net_protocol_t viona_neti_v6 = {
 };
 
 /*
- * Create/register a nethooks (in, out) for a given protocol (netip) (e.g.
- * IPv4, IPv6).
+ * Create/register our nethooks
  */
 static int
 viona_nethook_init(netid_t nid, viona_nethook_t *vnh, char *nh_name,
@@ -3196,13 +3006,9 @@ viona_neti_create(const netid_t netid)
 	list_create(&nip->vni_dev_list, sizeof (viona_soft_state_t),
 	    offsetof(viona_soft_state_t, ss_node));
 
-	if (viona_nethook_init(netid, &nip->vni_nhv4, Hn_VIONA,
-	    &viona_neti_v4) == 0)
-		nip->vni_nhv4.vnh_hooked = B_TRUE;
-
-	if (viona_nethook_init(netid, &nip->vni_nhv6, Hn_VIONA6,
-	    &viona_neti_v6) == 0)
-		nip->vni_nhv6.vnh_hooked = B_TRUE;
+	if (viona_nethook_init(netid, &nip->vni_nethook, Hn_VIONA,
+	    &viona_netinfo) == 0)
+		nip->vni_nethook.vnh_hooked = B_TRUE;
 
 	mutex_enter(&viona_neti_lock);
 	list_insert_tail(&viona_neti_list, nip);
@@ -3229,10 +3035,8 @@ viona_neti_shutdown(netid_t nid, void *arg)
 	list_remove(&viona_neti_list, nip);
 	mutex_exit(&viona_neti_lock);
 
-	if (nip->vni_nhv4.vnh_hooked)
-		viona_nethook_shutdown(&nip->vni_nhv4);
-	if (nip->vni_nhv6.vnh_hooked)
-		viona_nethook_shutdown(&nip->vni_nhv6);
+	if (nip->vni_nethook.vnh_hooked)
+		viona_nethook_shutdown(&nip->vni_nethook);
 }
 
 /*
@@ -3255,10 +3059,8 @@ viona_neti_destroy(netid_t nid, void *arg)
 
 	VERIFY(!list_link_active(&nip->vni_node));
 
-	if (nip->vni_nhv4.vnh_hooked)
-		viona_nethook_fini(&nip->vni_nhv4);
-	if (nip->vni_nhv6.vnh_hooked)
-		viona_nethook_fini(&nip->vni_nhv6);
+	if (nip->vni_nethook.vnh_hooked)
+		viona_nethook_fini(&nip->vni_nethook);
 
 	mutex_destroy(&nip->vni_lock);
 	list_destroy(&nip->vni_dev_list);

@@ -50,8 +50,7 @@ struct msgb;	/* avoiding sys/stream.h here */
 #define	NHF_ARP		"NHF_ARP"
 #define	NHF_VND_INET	"NHF_VND_INET"
 #define	NHF_VND_INET6	"NHF_VND_INET6"
-#define	NHF_VIONA_INET	"NHF_VIONA_INET"
-#define	NHF_VIONA_INET6	"NHF_VIONA_INET6"
+#define	NHF_VIONA	"NHF_VIONA"
 
 /*
  * Event identification

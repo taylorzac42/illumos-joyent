@@ -29,6 +29,10 @@ fr_availfuncs
 fr_features
 fr_objbytes
 hdrsizes
+hook_viona_in
+hook_viona_in_gz
+hook_viona_out
+hook_viona_out_gz
 hook4_in
 hook4_in_gz
 hook4_loop_in
@@ -39,10 +43,6 @@ hook4_nicevents
 hook4_nicevents_gz
 hook4_out
 hook4_out_gz
-hook4_viona_in
-hook4_viona_in_gz
-hook4_viona_out
-hook4_viona_out_gz
 hook4_vnd_in
 hook4_vnd_in_gz
 hook4_vnd_out
@@ -57,10 +57,6 @@ hook6_nicevents
 hook6_nicevents_gz
 hook6_out
 hook6_out_gz
-hook6_viona_in
-hook6_viona_in_gz
-hook6_viona_out
-hook6_viona_out_gz
 hook6_vnd_in
 hook6_vnd_in_gz
 hook6_vnd_out
@@ -74,6 +70,9 @@ ip6exthdr
 ipf_cb_ops
 ipf_dev_info
 ipf_devfiles
+ipf_eth_bcast_addr
+ipf_eth_ipv4_mcast
+ipf_eth_ipv6_mcast
 ipf_kstat_tmp
 ipf_minor
 ipf_ops
