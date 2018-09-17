@@ -310,7 +310,7 @@ ipf_stack_t *ifs;
 	}
 
 	/*
-	 * Remove notification of VIONA hooks
+	 * Remove notification of viona hooks
 	 */
 	net_instance_notify_unregister(ifs->ifs_netid,
 	    ipf_hook_instance_notify);
@@ -2427,10 +2427,16 @@ int ipf_hook_ether(hook_event_token_t token, hook_data_t info, void *arg,
 	 * sentence) after that has been done.
 	 */
 	mp = *hpe->hpe_mp;
+	len = MBLKL(mp);
+
+	VERIFY3S(len, >=, sizeof (struct ether_header));
+
 	ethp = (struct ether_header *)mp->b_rptr;
 	if ((etype = ntohs(ethp->ether_type)) == ETHERTYPE_VLAN) {
 		struct ether_vlan_header *evh =
 		    (struct ether_vlan_header *)ethp;
+
+		VERIFY3S(len, >=, sizeof (struct ether_vlan_header));
 
 		etype = ntohs(evh->ether_type);
 		offset = sizeof (*evh);
@@ -2458,7 +2464,7 @@ int ipf_hook_ether(hook_event_token_t token, hook_data_t info, void *arg,
 		hpe->hpe_flags |= HPE_MULTICAST;
 
 	/* Find the start of the IPv4 or IPv6 header */
-	for (len = MBLKL(mp); offset >= len; len = MBLKL(mp)) {
+	for (; offset >= len; len = MBLKL(mp)) {
 		offset -= len;
 		mp = mp->b_cont;
 		if (mp == NULL) {

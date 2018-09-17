@@ -2858,6 +2858,18 @@ static net_protocol_t viona_netinfo = {
 };
 
 /*
+ * Each entry corresponds to a step in the nethook setup (in order of setup).
+ * Used to track our progress in case we fail mid-setup.
+ */
+typedef enum viona_nh_init_progress {
+	VNH_INIT_NONE = 0,
+	VNH_INIT_PROTO,
+	VNH_INIT_FAMILY,
+	VNH_INIT_EVENT_IN,
+	VNH_INIT_EVENT_OUT,
+} viona_nh_init_progress_t;
+
+/*
  * Create/register our nethooks
  */
 static int
@@ -2869,10 +2881,9 @@ viona_nethook_init(netid_t nid, viona_nethook_t *vnh, char *nh_name,
 	 * reverse the order of operations and tear down cleanly.  Each
 	 * step is commented with its corresponding step number.
 	 */
-	uint_t progress = 0;
+	viona_nh_init_progress_t progress = VNH_INIT_NONE;
 	int ret;
 
-	/* 1 */
 	if ((vnh->vnh_neti = net_protocol_register(nid, netip)) == NULL) {
 		cmn_err(CE_NOTE, "%s: net_protocol_register failed "
 		    "(netid=%d name=%s)", __func__, nid, nh_name);
@@ -2880,7 +2891,6 @@ viona_nethook_init(netid_t nid, viona_nethook_t *vnh, char *nh_name,
 	}
 	progress++;
 
-	/* 2 */
 	HOOK_FAMILY_INIT(&vnh->vnh_family, nh_name);
 	if ((ret = net_family_register(vnh->vnh_neti, &vnh->vnh_family)) != 0) {
 		cmn_err(CE_NOTE, "%s: net_family_register failed "
@@ -2890,7 +2900,6 @@ viona_nethook_init(netid_t nid, viona_nethook_t *vnh, char *nh_name,
 	}
 	progress++;
 
-	/* 3 */
 	HOOK_EVENT_INIT(&vnh->vnh_event_in, NH_PHYSICAL_IN);
 	if ((vnh->vnh_token_in = net_event_register(vnh->vnh_neti,
 	    &vnh->vnh_event_in)) == NULL) {
@@ -2901,7 +2910,6 @@ viona_nethook_init(netid_t nid, viona_nethook_t *vnh, char *nh_name,
 	}
 	progress++;
 
-	/* 4 */
 	HOOK_EVENT_INIT(&vnh->vnh_event_out, NH_PHYSICAL_OUT);
 	if ((vnh->vnh_token_out = net_event_register(vnh->vnh_neti,
 	    &vnh->vnh_event_out)) == NULL) {
@@ -2922,27 +2930,27 @@ fail:
 		 */
 		cmn_err(CE_PANIC, "%s: Unhandled setup failure", __func__);
 		break;
-	case 4:
+	case VNH_INIT_EVENT_OUT:
 		VERIFY0(net_event_shutdown(vnh->vnh_neti, &vnh->vnh_event_out));
 		VERIFY0(net_event_unregister(vnh->vnh_neti,
 		    &vnh->vnh_event_out));
 		vnh->vnh_token_out = NULL;
 		/* FALLTHRU */
-	case 3:
+	case VNH_INIT_EVENT_IN:
 		VERIFY0(net_event_shutdown(vnh->vnh_neti, &vnh->vnh_event_in));
 		VERIFY0(net_event_unregister(vnh->vnh_neti,
 		    &vnh->vnh_event_in));
 		vnh->vnh_token_in = NULL;
 		/* FALLTHRU */
-	case 2:
+	case VNH_INIT_FAMILY:
 		VERIFY0(net_family_shutdown(vnh->vnh_neti, &vnh->vnh_family));
 		VERIFY0(net_family_unregister(vnh->vnh_neti, &vnh->vnh_family));
 		/* FALLTHRU */
-	case 1:
+	case VNH_INIT_PROTO:
 		VERIFY0(net_protocol_unregister(vnh->vnh_neti));
 		vnh->vnh_neti = NULL;
 		/* FALLTHRU */
-	case 0:
+	case VNH_INIT_NONE:
 		break;
 	}
 	return (1);
@@ -3079,14 +3087,13 @@ viona_neti_lookup_by_zid(zoneid_t zid)
 	mutex_enter(&viona_neti_lock);
 	for (nip = list_head(&viona_neti_list); nip != NULL;
 	    nip = list_next(&viona_neti_list, nip)) {
-		mutex_enter(&nip->vni_lock);
 		if (nip->vni_zid == zid) {
+			mutex_enter(&nip->vni_lock);
 			nip->vni_ref++;
 			mutex_exit(&nip->vni_lock);
 			mutex_exit(&viona_neti_lock);
 			return (nip);
 		}
-		mutex_exit(&nip->vni_lock);
 	}
 	mutex_exit(&viona_neti_lock);
 	return (NULL);
