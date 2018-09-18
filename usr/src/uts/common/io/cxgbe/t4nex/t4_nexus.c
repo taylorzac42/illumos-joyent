@@ -36,6 +36,7 @@
 #include <sys/stat.h>
 #include <sys/mkdev.h>
 #include <sys/queue.h>
+#include <sys/containerof.h>
 
 #include "version.h"
 #include "common/common.h"
@@ -2731,7 +2732,9 @@ t4_register_cpl_handler(struct adapter *sc, int opcode, cpl_handler_t h)
 static int
 fw_msg_not_handled(struct adapter *sc, const __be64 *data)
 {
-	struct cpl_fw6_msg *cpl = container_of(data, struct cpl_fw6_msg, data);
+	struct cpl_fw6_msg *cpl;
+
+	cpl = __containerof((void *)data, struct cpl_fw6_msg, data);
 
 	cxgb_printf(sc->dip, CE_WARN, "%s fw_msg type %d", __func__, cpl->type);
 	return (0);
