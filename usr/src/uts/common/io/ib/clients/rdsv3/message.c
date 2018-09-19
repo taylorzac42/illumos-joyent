@@ -136,7 +136,7 @@ void
 rdsv3_message_inc_free(struct rdsv3_incoming *inc)
 {
 	struct rdsv3_message *rm =
-	    container_of(inc, struct rdsv3_message, m_inc);
+	    __containerof(inc, struct rdsv3_message, m_inc);
 	rdsv3_message_put(rm);
 }
 
@@ -399,7 +399,7 @@ rdsv3_message_inc_copy_to_user(struct rdsv3_incoming *inc,
 	int ret;
 	uint32_t len;
 
-	rm = container_of(inc, struct rdsv3_message, m_inc);
+	rm = __containerof(inc, struct rdsv3_message, m_inc);
 	len = ntohl(rm->m_inc.i_hdr.h_len);
 
 	RDSV3_DPRINTF4("rdsv3_message_inc_copy_to_user",

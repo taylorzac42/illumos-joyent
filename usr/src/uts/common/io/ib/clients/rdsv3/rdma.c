@@ -147,7 +147,7 @@ rdsv3_rdma_drop_keys(struct rdsv3_sock *rs)
 	/* Release any MRs associated with this socket */
 	mutex_enter(&rs->rs_rdma_lock);
 	while ((node = avl_first(&rs->rs_rdma_keys))) {
-		mr = container_of(node, struct rdsv3_mr, r_rb_node);
+		mr = __containerof(node, struct rdsv3_mr, r_rb_node);
 		if (mr->r_trans == rs->rs_transport)
 			mr->r_invalidate = 0;
 		avl_remove(&rs->rs_rdma_keys, &mr->r_rb_node);
