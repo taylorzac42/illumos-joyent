@@ -493,7 +493,7 @@ struct viona_neti {
 
 	kmutex_t		vni_lock;	/* Protects remaining members */
 	kcondvar_t		vni_ref_change; /* Protected by vni_lock */
-	int			vni_ref;	/* Protected by vni_lock */
+	u_int			vni_ref;	/* Protected by vni_lock */
 	list_t			vni_dev_list;	/* Protected by vni_lock */
 };
 
@@ -2223,8 +2223,28 @@ viona_rx(void *arg, mac_resource_handle_t mrh, mblk_t *mp, boolean_t loopback)
 		mp->b_next = NULL;
 		size = msgsize(mp);
 
-		if ((err = viona_hook(link, ring, &mp, B_FALSE)) != 0)
-			goto pad_drop;
+		/*
+		 * We treat both a 'drop' response and errors the same here
+		 * and put the packet on the drop chain.  As packets may be
+		 * subject to different actions in ipf (which do not all
+		 * return the same set of error values), an error processing
+		 * one packet doesn't mean the next packet will also generate
+		 * an error.
+		 */
+		if (viona_hook(link, ring, &mp, B_FALSE) != 0) {
+			if (mp != NULL) {
+				*mdrop_prevp = mp;
+				mpdrop_prevp = &mp->b_next;
+			} else {
+				/*
+				 * If we're didn't defer freeing mp, update
+				 * the drop count now.
+				 */
+				ndrop++;
+			}
+			mp = next;
+			continue;
+		}
 
 		/*
 		 * Ethernet frames are expected to be padded out in order to
@@ -2623,8 +2643,26 @@ viona_tx(viona_link_t *link, viona_vring_t *ring)
 		mp_tail = mp;
 	}
 
-	if (viona_hook(link, ring, &mp_head, B_TRUE) != 0)
-		goto drop_fail;
+	/*
+	 * In case the hook tries to free the packet and set the mblk_t pointer
+	 * to NULL, take a ref on dp (if it's being used) to prevent the
+	 * cleanup from occuring during the call to viona_hook() so the
+	 * viona_desb_t can be reset and recycled.  Also set and pass &mp to
+	 * viona_hook so we don't lose track of mp_head if viona_hook()
+	 * tries to set mp to NULL.
+	 */
+	if (dp != NULL)
+		dp->d_ref++;
+
+	mp = mp_head;
+	if (viona_hook(link, ring, &mp, B_TRUE) != 0) {
+		if (mp != NULL)
+			freemsgchain(mp);
+		goto drop_hook;
+	}
+
+	if (dp != NULL)
+		dp->d_ref--;
 
 	/* Request hardware checksumming, if necessary */
 	if ((link->l_features & VIRTIO_NET_F_CSUM) != 0 &&
@@ -2679,6 +2717,8 @@ drop_fail:
 	 * dropped data to be released to the used ring.
 	 */
 	freemsgchain(mp_head);
+
+drop_hook:
 	len = 0;
 	for (uint_t i = 0; i < n; i++) {
 		len += iov[i].iov_len;
@@ -2732,12 +2772,12 @@ viona_hook(viona_link_t *link, viona_vring_t *ring, mblk_t **mpp, boolean_t out)
 		return (0);
 
 	if (out) {
-		VIONA_PROBE2(tx_hook_drop, viona_vring_t *, ring,
-		    mblk_t *, *mpp);
+		VIONA_PROBE3(tx_hook_drop, viona_vring_t *, ring,
+		    mblk_t *, *mpp, int, ret);
 		VIONA_RING_STAT_INCR(ring, tx_hookdrop);
 	} else {
-		VIONA_PROBE2(rx_hook_drop, viona_vring_t *, ring,
-		    mblk_t *, *mpp);
+		VIONA_PROBE3(rx_hook_drop, viona_vring_t *, ring,
+		    mblk_t *, *mpp, int, ret);
 		VIONA_RING_STAT_INCR(ring, rx_hookdrop);
 	}
 	return (ret);
