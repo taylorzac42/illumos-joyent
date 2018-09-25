@@ -387,6 +387,11 @@ enum viona_ring_state_flags {
 		(((ring)->vr_state_flags & VRSF_REQ_STOP) != 0 ||	\
 		((proc)->p_flag & SEXITING) != 0)
 
+#define	VNETHOOK_INTERESTED_IN(neti) \
+	(neti)->vni_nethook.vnh_event_in.he_interested
+#define	VNETHOOK_INTERESTED_OUT(neti) \
+	(neti)->vni_nethook.vnh_event_out.he_interested
+
 typedef struct viona_vring {
 	viona_link_t	*vr_link;
 
@@ -493,7 +498,7 @@ struct viona_neti {
 
 	kmutex_t		vni_lock;	/* Protects remaining members */
 	kcondvar_t		vni_ref_change; /* Protected by vni_lock */
-	u_int			vni_ref;	/* Protected by vni_lock */
+	uint_t			vni_ref;	/* Protected by vni_lock */
 	list_t			vni_dev_list;	/* Protected by vni_lock */
 };
 
@@ -2231,14 +2236,15 @@ viona_rx(void *arg, mac_resource_handle_t mrh, mblk_t *mp, boolean_t loopback)
 		 * one packet doesn't mean the next packet will also generate
 		 * an error.
 		 */
-		if (viona_hook(link, ring, &mp, B_FALSE) != 0) {
+		if (VNETHOOK_INTERESTED_IN(link->l_neti) &&
+		    viona_hook(link, ring, &mp, B_FALSE) != 0) {
 			if (mp != NULL) {
-				*mdrop_prevp = mp;
+				*mpdrop_prevp = mp;
 				mpdrop_prevp = &mp->b_next;
 			} else {
 				/*
-				 * If we're didn't defer freeing mp, update
-				 * the drop count now.
+				 * If the hook consumer (e.g. ipf) already
+				 * freed the mblk_t, update the drop count now.
 				 */
 				ndrop++;
 			}
@@ -2312,7 +2318,7 @@ pad_drop:
 		 * freed after the guest has been notified.  If mp is
 		 * already NULL, just proceed on.
 		 */
-		if (err != 0 && mp != NULL) {
+		if (err != 0) {
 			*mpdrop_prevp = mp;
 			mpdrop_prevp = &mp->b_next;
 
@@ -2325,7 +2331,7 @@ pad_drop:
 				mp->b_next = next;
 				break;
 			}
-		} else if (mp != NULL) {
+		} else {
 			/* Chain successful mblks to be freed later */
 			*mprx_prevp = mp;
 			mprx_prevp = &mp->b_next;
@@ -2643,26 +2649,37 @@ viona_tx(viona_link_t *link, viona_vring_t *ring)
 		mp_tail = mp;
 	}
 
-	/*
-	 * In case the hook tries to free the packet and set the mblk_t pointer
-	 * to NULL, take a ref on dp (if it's being used) to prevent the
-	 * cleanup from occuring during the call to viona_hook() so the
-	 * viona_desb_t can be reset and recycled.  Also set and pass &mp to
-	 * viona_hook so we don't lose track of mp_head if viona_hook()
-	 * tries to set mp to NULL.
-	 */
-	if (dp != NULL)
-		dp->d_ref++;
+	if (VNETHOOK_INTERESTED_OUT(link->l_neti)) {
+		/*
+		 * The hook consumer may elect to free the mblk_t and set
+		 * our mblk_t ** to NULL.  When using a viona_desb_t
+		 * (dp != NULL), we do not want the corresponding cleanup to
+		 * occur during the viona_hook() call. We instead want to
+		 * reset and recycle dp for future use.  To prevent cleanup
+		 * during the viona_hook() call, we take a ref on dp (if being
+		 * used), and release it on success.  On failure, the
+		 * freemsgchain() call will release all the refs taken earlier
+		 * in viona_tx() (aside from the initial ref and the one we
+		 * take), and drop_hook will reset dp for reuse.
+		 */
+		if (dp != NULL)
+			dp->d_ref++;
 
-	mp = mp_head;
-	if (viona_hook(link, ring, &mp, B_TRUE) != 0) {
-		if (mp != NULL)
-			freemsgchain(mp);
-		goto drop_hook;
+		/*
+		 * Pass &mp instead of &mp_head so we don't lose track of
+		 * mp_head if the hook consumer (i.e. ipf) elects to free mp
+		 * and set mp to NULL.
+		 */
+		mp = mp_head;
+		if (viona_hook(link, ring, &mp, B_TRUE) != 0) {
+			if (mp != NULL)
+				freemsgchain(mp);
+			goto drop_hook;
+		}
+
+		if (dp != NULL)
+			dp->d_ref--;
 	}
-
-	if (dp != NULL)
-		dp->d_ref--;
 
 	/* Request hardware checksumming, if necessary */
 	if ((link->l_features & VIRTIO_NET_F_CSUM) != 0 &&
@@ -2898,24 +2915,24 @@ static net_protocol_t viona_netinfo = {
 };
 
 /*
- * Each entry corresponds to a step in the nethook setup (in order of setup).
- * Used to track our progress in case we fail mid-setup.
- */
-typedef enum viona_nh_init_progress {
-	VNH_INIT_NONE = 0,
-	VNH_INIT_PROTO,
-	VNH_INIT_FAMILY,
-	VNH_INIT_EVENT_IN,
-	VNH_INIT_EVENT_OUT,
-} viona_nh_init_progress_t;
-
-/*
  * Create/register our nethooks
  */
 static int
 viona_nethook_init(netid_t nid, viona_nethook_t *vnh, char *nh_name,
     net_protocol_t *netip)
 {
+	/*
+	 * Each entry corresponds to a step in the nethook setup (in order of
+	 * setup). Used to track our progress in case we fail mid-setup.
+	 */
+	typedef enum viona_nh_init_progress {
+		VNH_INIT_NONE = 0,
+		VNH_INIT_PROTO,
+		VNH_INIT_FAMILY,
+		VNH_INIT_EVENT_IN,
+		VNH_INIT_EVENT_OUT,
+	} viona_nh_init_progress_t;
+
 	/*
 	 * Track how far we get during setup, used if we fail mid-way to
 	 * reverse the order of operations and tear down cleanly.  Each
