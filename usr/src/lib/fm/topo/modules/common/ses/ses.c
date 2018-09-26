@@ -1393,7 +1393,7 @@ ses_create_generic(ses_enum_data_t *sdp, ses_enum_node_t *snp, tnode_t *pnode,
 	nvlist_t *props, *aprops;
 	nvlist_t *auth = NULL, *fmri = NULL;
 	tnode_t *tn = NULL;
-	char label[128];
+	char *clean_label = NULL, label[128];
 	int err;
 	char *part = NULL, *serial = NULL, *revision = NULL;
 	char *desc;
@@ -1454,9 +1454,9 @@ ses_create_generic(ses_enum_data_t *sdp, ses_enum_node_t *snp, tnode_t *pnode,
 	/*
 	 * For the node label, we look for the following in order:
 	 *
-	 * 	<ses-description>
-	 * 	<ses-class-description> <instance>
-	 * 	<default-type-label> <instance>
+	 * <ses-description>
+	 * <ses-class-description> <instance>
+	 * <default-type-label> <instance>
 	 */
 	if (nvlist_lookup_string(props, SES_PROP_DESCRIPTION, &desc) != 0 ||
 	    desc[0] == '\0') {
@@ -1470,7 +1470,11 @@ ses_create_generic(ses_enum_data_t *sdp, ses_enum_node_t *snp, tnode_t *pnode,
 		desc = label;
 	}
 
-	if (topo_node_label_set(tn, desc, &err) != 0)
+	if ((clean_label = topo_mod_clean_str(mod, desc)) == NULL)
+		goto error;
+
+	if (topo_prop_set_string(tn, TOPO_PGROUP_PROTOCOL, TOPO_PROP_LABEL,
+	    TOPO_PROP_MUTABLE, clean_label, &err) < 0)
 		goto error;
 
 	if (ses_set_standard_props(mod, frutn, tn, NULL, ses_node_id(np),
@@ -1514,12 +1518,14 @@ ses_create_generic(ses_enum_data_t *sdp, ses_enum_node_t *snp, tnode_t *pnode,
 
 	nvlist_free(auth);
 	nvlist_free(fmri);
+	topo_mod_strfree(mod, clean_label);
 	if (node != NULL) *node = tn;
 	return (0);
 
 error:
 	nvlist_free(auth);
 	nvlist_free(fmri);
+	topo_mod_strfree(mod, clean_label);
 	return (-1);
 }
 
@@ -2251,7 +2257,7 @@ ses_create_subchassis(ses_enum_data_t *sdp, tnode_t *pnode,
 	nvlist_t *auth = NULL, *fmri = NULL;
 	uint64_t instance = scp->sec_instance;
 	char *desc;
-	char label[128];
+	char *clean_label = NULL, label[128];
 	char **paths;
 	int i, err;
 	ses_enum_target_t *stp;
@@ -2306,7 +2312,11 @@ ses_create_subchassis(ses_enum_data_t *sdp, tnode_t *pnode,
 		desc = label;
 	}
 
-	if (topo_node_label_set(tn, desc, &err) != 0)
+	if ((clean_label = topo_mod_clean_str(mod, desc)) == NULL)
+		goto error;
+
+	if (topo_prop_set_string(tn, TOPO_PGROUP_PROTOCOL, TOPO_PROP_LABEL,
+	    TOPO_PROP_MUTABLE, clean_label, &err) < 0)
 		goto error;
 
 	if (ses_set_standard_props(mod, NULL, tn, NULL,
@@ -2372,6 +2382,7 @@ ses_create_subchassis(ses_enum_data_t *sdp, tnode_t *pnode,
 error:
 	nvlist_free(auth);
 	nvlist_free(fmri);
+	topo_mod_strfree(mod, clean_label);
 	return (ret);
 }
 
@@ -2839,9 +2850,9 @@ ses_create_chassis(ses_enum_data_t *sdp, tnode_t *pnode, ses_enum_chassis_t *cp)
 	/*
 	 * We use the following property mappings:
 	 *
-	 * 	manufacturer		vendor-id
-	 * 	model			product-id
-	 * 	serial-number		libses-chassis-serial
+	 * manufacturer		vendor-id
+	 * model		product-id
+	 * serial-number	libses-chassis-serial
 	 */
 	verify(nvlist_lookup_string(props, SES_EN_PROP_VID,
 	    &raw_manufacturer) == 0);

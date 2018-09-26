@@ -3286,7 +3286,6 @@ cpuid_pass4(cpu_t *cpu, uint_t *hwcap_out)
 			hwcap_flags_2 |= AV_386_2_RDSEED;
 		if (*ebx & CPUID_INTC_EBX_7_0_SHA)
 			hwcap_flags_2 |= AV_386_2_SHA;
-
 	}
 
 	/* Detect systems with a potential CPUID limit  */
@@ -5472,6 +5471,7 @@ cpuid_pass_ucode(cpu_t *cpu, uchar_t *fset)
 	cpuid_scan_security(cpu, fset);
 }
 
+/* ARGSUSED */
 static int
 cpuid_post_ucodeadm_xc(xc_arg_t arg0, xc_arg_t arg1, xc_arg_t arg2)
 {
@@ -5540,7 +5540,8 @@ cpuid_post_ucodeadm(void)
 		if (!compare_x86_featureset(f0, fset)) {
 			panic("Post microcode update CPU %d has "
 			    "differing security feature (%p) set from CPU 0 "
-			    "(%p), not appending to feature set", i, fset, f0);
+			    "(%p), not appending to feature set", i,
+			    (void *)fset, (void *)f0);
 		}
 	}
 
