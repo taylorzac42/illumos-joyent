@@ -12,6 +12,7 @@
 .\"
 .\" Copyright 2011 Richard Lowe.
 .\" Copyright 2015 Elysium Digital, L.L.C.
+.\" Copyright 2018 Joyent, Inc.
 .\"
 
 .TH "GIT\-PBCHK" "1ONBLD" "September 4, 2018" "" ""

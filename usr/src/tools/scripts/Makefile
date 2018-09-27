@@ -22,7 +22,8 @@
 # Copyright (c) 1999, 2010, Oracle and/or its affiliates. All rights reserved.
 #
 # Copyright 2010, Richard Lowe
-# Copyright 2017 Joyent, Inc.
+#
+# Copyright 2018 Joyent, Inc.
 
 SHELL=/usr/bin/ksh93
 

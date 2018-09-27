@@ -21,6 +21,8 @@
 .\"
 .\" CDDL HEADER END
 .\"
+.\" Copyright 2018 Joyent, Inc.
+.\"
 .TH INSTALL 1ONBLD "Jan 14, 2010"
 .SH NAME
 Install \- install a kernel from an ON workspace
