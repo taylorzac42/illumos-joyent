@@ -850,7 +850,7 @@ bd_realstrategy(void *devdata, int rw, daddr_t dblk, size_t size,
 	bdinfo_t *bd;
 	uint64_t disk_blocks, offset, d_offset;
 	size_t blks, blkoff, bsize, bio_size, rest;
-	caddr_t bbuf;
+	caddr_t bbuf = NULL;
 	int rc;
 
 	bd = bd_get_bdinfo(&dev->dd);
