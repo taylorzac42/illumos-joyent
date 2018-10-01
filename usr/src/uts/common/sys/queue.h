@@ -37,7 +37,7 @@
 #define	_SYS_QUEUE_H
 
 #include <sys/note.h>
-#include <sys/stddef.h>
+#include <sys/containerof.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -86,7 +86,7 @@ extern "C" {
  * A circle queue may be traversed in either direction, but has a more
  * complex end of list detection.
  *
- * For details on the use of these macros, see the queue(3) manual page.
+ * For details on the use of these macros, see the queue.h(3HEAD) manual page.
  */
 
 #ifdef QUEUE_MACRO_DEBUG
@@ -377,7 +377,7 @@ struct {								\
 
 #define	STAILQ_LAST(head, type, field)					\
 	(STAILQ_EMPTY((head)) ? NULL :					\
-	    container_of((head)->stqh_last,				\
+	    __containerof((head)->stqh_last,				\
 	    QUEUE_TYPEOF(type), field.stqe_next))
 
 #define	STAILQ_REMOVE_HEAD(head, field) do {				\
@@ -459,7 +459,7 @@ struct {								\
 #define	LIST_NEXT(elm, field)		((elm)->field.le_next)
 #define	LIST_PREV(elm, head, type, field)				\
 	((elm)->field.le_prev == &LIST_FIRST((head)) ? NULL :		\
-	container_of((elm)->field.le_prev, type, field.le_next))
+	__containerof((elm)->field.le_prev, type, field.le_next))
 
 #define	LIST_FOREACH(var, head, field)					\
 	for ((var) = LIST_FIRST((head));				\
