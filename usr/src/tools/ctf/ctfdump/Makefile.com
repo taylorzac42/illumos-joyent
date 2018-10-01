@@ -14,6 +14,8 @@ SRCS = ctfdump.c
 
 include ../../Makefile.ctf
 
+CSTD = $(CSTD_GNU99)
+C99LMODE = -Xc99=%all
 CFLAGS += $(CCVERBOSE)
 LDLIBS += -lctf
 
