@@ -1558,7 +1558,6 @@ ctf_dwarf_create_enum(ctf_die_t *cdp, Dwarf_Die die, ctf_id_t *idp, int isroot)
 	if ((ret = ctf_dwmap_add(cdp, id, die, B_FALSE)) != 0)
 		return (ret);
 
-
 	if ((ret = ctf_dwarf_child(cdp, die, &child)) != 0) {
 		if (ret == ENOENT)
 			ret = 0;
@@ -1585,28 +1584,31 @@ ctf_dwarf_create_enum(ctf_die_t *cdp, Dwarf_Die die, ctf_id_t *idp, int isroot)
 			continue;
 		}
 
-		if ((ret = ctf_dwarf_signed(cdp, arg, DW_AT_const_value,
-		    &sval)) == 0) {
-			eval = sval;
-		} else if (ret != ENOENT) {
-			return (ret);
-		} else if ((ret = ctf_dwarf_unsigned(cdp, arg,
-		    DW_AT_const_value, &uval)) == 0) {
-			eval = (int)uval;
-		} else {
-			(void) snprintf(cdp->cd_errbuf, cdp->cd_errlen,
-			    "encountered enumration without constant value\n");
-			return (ECTF_CONVBKERR);
-		}
-
 		/*
 		 * DWARF v4 section 5.7 tells us we'll always have names.
 		 */
-		if ((ret = ctf_dwarf_string(cdp, arg, DW_AT_name,
-		    &name)) != 0)
+		if ((ret = ctf_dwarf_string(cdp, arg, DW_AT_name, &name)) != 0)
+			return (ret);
+
+		/*
+		 * We have to be careful here: newer GCCs generate DWARF where
+		 * an unsigned value will happily pass ctf_dwarf_signed().
+		 * Since negative values will fail ctf_dwarf_unsigned(), we try
+		 * that first to make sure we get the right value.
+		 */
+		if ((ret = ctf_dwarf_unsigned(cdp, arg,
+		    DW_AT_const_value, &uval)) == 0) {
+			eval = (int)uval;
+		} else if ((ret = ctf_dwarf_signed(cdp, arg,
+		    DW_AT_const_value, &sval)) == 0) {
+			eval = sval;
+		}
+
+		if (ret != 0)
 			return (ret);
 
 		ret = ctf_add_enumerator(cdp->cd_ctfp, id, name, eval);
+
 		if (ret == CTF_ERR) {
 			(void) snprintf(cdp->cd_errbuf, cdp->cd_errlen,
 			    "failed to add enumarator %s (%d) to %d\n",
