@@ -119,6 +119,9 @@ static devfsadm_create_t misc_cbt[] = {
 	{ "pseudo", "ddi_pseudo", "inotify",
 	    TYPE_EXACT | DRV_EXACT, ILEVEL_0, minor_name
 	},
+	{ "pseudo", "ddi_pseudo", "efirt",
+	    TYPE_EXACT | DRV_EXACT, ILEVEL_0, minor_name
+	},
 	{ "pseudo", "ddi_pseudo", "ipd",
 	    TYPE_EXACT | DRV_EXACT, ILEVEL_0, minor_name
 	},
