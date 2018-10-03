@@ -773,7 +773,7 @@ ipf_hook_instance_notify(hook_notify_cmd_t command, void *arg,
     const char *netid, const char *dummy __unused, const char *instance)
 {
 	ipf_stack_t *ifs = arg;
-	int ret;
+	int ret = 0;
 
 	/* We currently only care about viona hooks */
 	if (strcmp(instance, Hn_VIONA) != 0)
@@ -787,7 +787,6 @@ ipf_hook_instance_notify(hook_notify_cmd_t command, void *arg,
 		ifs->ifs_ipf_viona = net_protocol_lookup(ifs->ifs_netid,
 		    NHF_VIONA);
 
-		/* XXX: Better return value? */
 		if (ifs->ifs_ipf_viona == NULL)
 			return (EPROTONOSUPPORT);
 

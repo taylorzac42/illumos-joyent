@@ -528,7 +528,7 @@ static id_space_t		*viona_minors;
 static mblk_t			*viona_vlan_pad_mp;
 
 /*
- * Global linked list of viona_neti_t's.  Access is protected by viona_neti_lock
+ * Global linked list of viona_neti_ts.  Access is protected by viona_neti_lock
  */
 static kmutex_t			viona_neti_lock;
 static list_t			viona_neti_list;
