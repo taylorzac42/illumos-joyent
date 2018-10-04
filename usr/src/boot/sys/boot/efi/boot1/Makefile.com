@@ -15,11 +15,7 @@
 
 include $(SRC)/Makefile.master
 include $(SRC)/boot/Makefile.version
-
-CC=	$(GNUC_ROOT)/bin/gcc
-LD=	$(GNU_ROOT)/bin/gld
-OBJCOPY= $(GNU_ROOT)/bin/gobjcopy
-OBJDUMP= $(GNU_ROOT)/bin/gobjdump
+include $(SRC)/boot/sys/boot/Makefile.inc
 
 PROG=		boot1.sym
 
@@ -29,8 +25,8 @@ SRCS=	multiboot.S boot1.c self_reloc.c start.S ufs_module.c zfs_module.c \
 OBJS=	multiboot.o boot1.o self_reloc.o start.o ufs_module.o zfs_module.o \
 	devopen.o
 
-CFLAGS= -Os
-CPPFLAGS=	-nostdinc -D_STANDALONE
+zfs_module.o := CFLAGS += -Wno-unused-function
+
 CPPFLAGS +=	-I.
 CPPFLAGS +=	-I../../include
 CPPFLAGS +=	-I../../include/$(MACHINE)
@@ -41,7 +37,7 @@ CPPFLAGS +=	-I../../../../../lib/libstand
 CPPFLAGS +=	-DUFS1_ONLY
 # CPPFLAGS +=	-DEFI_DEBUG
 
-CPPFLAGS +=	-I../../../zfs/
+CPPFLAGS +=	-I$(ZFSSRC)
 CPPFLAGS +=	-I../../../../cddl/boot/zfs/
 
 # Always add MI sources and REGULAR efi loader bits
@@ -71,10 +67,8 @@ LIBEFI=		../../libefi/$(MACHINE)/libefi.a
 # as well as required string and memory functions for all platforms.
 #
 LIBSTAND=	../../../libstand/$(MACHINE)/libstand.a
-LIBZFSBOOT=	../../../zfs/$(MACHINE)/libzfsboot.a
-DPADD=		$(LIBEFI) $(LIBZFSBOOT) $(LIBSTAND)
+DPADD=		$(LIBEFI) $(LIBSTAND)
 LDADD=		-L../../libefi/$(MACHINE) -lefi
-LDADD +=	-L../../../zfs/$(MACHINE) -lzfsboot
 LDADD +=	-L../../../libstand/$(MACHINE) -lstand
 
 DPADD +=	$(LDSCRIPT)
