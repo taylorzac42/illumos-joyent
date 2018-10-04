@@ -13,22 +13,9 @@
 # Copyright 2015 Toomas Soome <tsoome@me.com>
 #
 
-BINDIR=	/boot
-PNGLITE=$(SRC)/common/pnglite
-
 # Options used when building app-specific efi components
-# See conf/kern.mk for the correct set of these
-CFLAGS +=	-fPIC -ffreestanding -Wformat -msoft-float
-CFLAGS +=	-mno-mmx -mno-3dnow -mno-sse2 -mno-sse3 -mno-sse
-CFLAGS +=	-mno-avx -fshort-wchar -mno-aes
-CFLAGS +=	-std=gnu99 -Wno-pointer-sign -Wno-empty-body
-
-#CFLAGS +=	-Wsystem-headers -Werror -Wall -Wno-format-y2k -W
-#CFLAGS +=	-Wno-unused-parameter -Wstrict-prototypes -Wmissing-prototypes
-#CFLAGS +=	-Wpointer-arith -Wreturn-type -Wcast-qual -Wwrite-strings
-#CFLAGS +=	-Wswitch -Wshadow -Wunused-parameter -Wcast-align -Wno-cast-qual
-#CFLAGS +=	-Wchar-subscripts -Winline -Wnested-externs -Wredundant-decls
-#CFLAGS +=	-Wold-style-definition
-
-ASFLAGS +=	-fPIC
-# include ../Makefile.inc
+CFLAGS +=	-fshort-wchar
+CFLAGS +=	-fident -finline -fno-inline-functions -fno-asm
+CFLAGS +=	-fdiagnostics-show-option -nodefaultlibs
+CFLAGS +=	-fno-inline-small-functions -fno-inline-functions-called-once
+CFLAGS +=	-fno-ipa-cp

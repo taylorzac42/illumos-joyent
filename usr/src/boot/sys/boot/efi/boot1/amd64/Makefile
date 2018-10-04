@@ -15,7 +15,6 @@
 #
 
 MACHINE=	$(MACH64)
-ASFLAGS=	-m64
 EFIPROG=	bootx64.efi
 
 all:		$(EFIPROG)
@@ -27,6 +26,7 @@ LDFLAGS +=	-znocombreloc
 
 CPPFLAGS +=	-DLOADER_EFI=\"loader64.efi\"
 CFLAGS +=	-m64 -mno-red-zone
+CCASFLAGS +=	-m64
 
 CLEANFILES +=	machine x86
 

@@ -119,6 +119,11 @@ extern vm_offset_t	memtop_copyin;	/* memtop less heap size for the cases */
 extern uint32_t		high_heap_size;	/* extended memory region available */
 extern vm_offset_t	high_heap_base;	/* for use as the heap */
 
+/* 16KB buffer space for real mode data transfers. */
+#define	BIO_BUFFER_SIZE 0x4000
+void *bio_alloc(size_t size);
+void bio_free(void *ptr, size_t size);
+
 void	biospci_detect(void);
 int biospci_find_devclass(uint32_t class, int index, uint32_t *locator);
 int biospci_read_config(uint32_t locator, int offset, int width, uint32_t *val);

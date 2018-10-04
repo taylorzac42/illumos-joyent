@@ -17,14 +17,7 @@ include $(SRC)/Makefile.master
 include $(SRC)/boot/Makefile.version
 include $(SRC)/boot/sys/boot/Makefile.inc
 
-CC=		$(GNUC_ROOT)/bin/gcc
-LD=		$(GNU_ROOT)/bin/gld
-OBJCOPY=	$(GNU_ROOT)/bin/gobjcopy
-OBJDUMP=	$(GNU_ROOT)/bin/gobjdump
-
 PROG=		loader.sym
-
-PNGLITE=	$(SRC)/common/pnglite
 
 # architecture-specific loader code
 SRCS=	autoload.c bootinfo.c conf.c copy.c efi_main.c framebuffer.c main.c \
@@ -35,8 +28,7 @@ OBJS=	autoload.o bootinfo.o conf.o copy.o efi_main.o framebuffer.o main.o \
 	self_reloc.o smbios.o acpi.o vers.o memmap.o multiboot.o multiboot2.o \
 	font.o $(FONT).o tem.o
 
-CFLAGS=	-Os
-CPPFLAGS= -nostdinc -I../../../../../include -I../../..../
+CPPFLAGS += -I../../../../../include -I../../..../
 CPPFLAGS += -I../../../../../lib/libstand
 CPPFLAGS += -I../../../../../lib/libz
 
@@ -49,7 +41,7 @@ CPPFLAGS +=	-I../../include
 CPPFLAGS +=	-I../../include/$(MACHINE)
 CPPFLAGS +=	-I../../../..
 CPPFLAGS +=	-I../../../i386/libi386
-CPPFLAGS +=	-I../../../zfs
+CPPFLAGS +=	-I$(ZFSSRC)
 CPPFLAGS +=	-I../../../../cddl/boot/zfs
 CPPFLAGS +=	-I$(SRC)/uts/intel/sys/acpi
 CPPFLAGS +=	-I$(PNGLITE)
@@ -69,9 +61,6 @@ CPPFLAGS +=	-DBOOT_FORTH -D_STANDALONE
 CPPFLAGS +=	-I$(SRC)/common/ficl
 CPPFLAGS +=	-I../../../libficl
 LIBFICL=	../../../libficl/$(MACHINE)/libficl.a
-
-CPPFLAGS +=	-I../../../zfs
-LIBZFSBOOT=	../../../zfs/$(MACHINE)/libzfsboot.a
 
 # Always add MI sources
 include	../Makefile.common
@@ -114,10 +103,8 @@ $(EFIPROG): loader.sym
 LIBEFI=		../../libefi/$(MACHINE)/libefi.a
 LIBCRYPTO=	../../../libcrypto/$(MACHINE)/libcrypto.a
 
-DPADD=		$(LIBFICL) $(LIBZFSBOOT) $(LIBEFI) $(LIBCRYPTO) $(LIBSTAND) \
-		$(LDSCRIPT)
-LDADD=		$(LIBFICL) $(LIBZFSBOOT) $(LIBEFI) $(LIBCRYPTO) $(LIBSTAND)
-
+DPADD=		$(LIBFICL) $(LIBEFI) $(LIBCRYPTO) $(LIBSTAND) $(LDSCRIPT)
+LDADD=		$(LIBFICL) $(LIBEFI) $(LIBCRYPTO) $(LIBSTAND)
 
 loader.sym:	$(OBJS) $(DPADD)
 	$(LD) $(LDFLAGS) -o $@ $(OBJS) $(LDADD)

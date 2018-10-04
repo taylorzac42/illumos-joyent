@@ -14,8 +14,7 @@
 #
 
 include $(SRC)/Makefile.master
-
-CC=     $(GCC_ROOT)/bin/gcc
+include $(SRC)/boot/sys/boot/Makefile.inc
 
 install:
 
@@ -23,8 +22,7 @@ SRCS +=	sha1.c digest.c
 
 OBJS=	$(SRCS:%.c=%.o)
 
-CFLAGS = -Os
-CFLAGS += -fPIC -ffreestanding -msoft-float
+CFLAGS += -msoft-float
 CFLAGS += -mno-mmx -mno-3dnow -mno-sse2 -mno-sse3 -mno-sse
 CFLAGS += -mno-avx -mno-aes -std=gnu99
 
@@ -32,12 +30,11 @@ CFLAGS += -mno-avx -mno-aes -std=gnu99
 #CFLAGS+=	-msoft-float -mgeneral-regs-only
 #.endif
 
-CPPFLAGS = -nostdinc -I. -I../../../../include -I../../..
+CPPFLAGS += -I. -I../../../../include -I../../..
 CPPFLAGS += -I../../../../lib/libstand
 
 # Pick up the bootstrap header for some interface items
 CPPFLAGS += -I../../common
-CPPFLAGS += -D_STANDALONE
 
 #include ../../Makefile.inc
 

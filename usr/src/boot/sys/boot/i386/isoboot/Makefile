@@ -15,11 +15,7 @@
 
 include $(SRC)/Makefile.master
 include $(SRC)/boot/Makefile.version
-
-AS=	$(GNU_ROOT)/bin/gas
-LD=	$(GNU_ROOT)/bin/gld
-CC=	$(GCC_ROOT)/bin/gcc
-OBJCOPY=	$(GNU_ROOT)/bin/gobjcopy
+include $(SRC)/boot/sys/boot/Makefile.inc
 
 PROG=		isoboot
 FILEMODE=0444
@@ -34,9 +30,8 @@ ORG2=	0x0
 
 ISOBOOTSIZE=	30720
 
-CPPFLAGS=	-nostdinc -D_STANDALONE
-CFLAGS=	-DBOOTPROG=\"isoboot\" \
-	-O1 \
+CFLAGS += -fno-reorder-functions
+CPPFLAGS += -DBOOTPROG=\"isoboot\" \
 	-DSIOPRT=${BOOT_COMCONSOLE_PORT} \
 	-DSIOFMT=${B2SIOFMT} \
 	-DSIOSPD=${BOOT_COMCONSOLE_SPEED} \
@@ -47,22 +42,12 @@ CFLAGS=	-DBOOTPROG=\"isoboot\" \
 	-I../common \
 	-I../btx/lib \
 	-I../../common \
-	-I../gptzfsboot \
-	-Wall -Waggregate-return -Wbad-function-cast -Wno-cast-align \
-	-Wmissing-declarations -Wmissing-prototypes -Wnested-externs \
-	-Wpointer-arith -Wshadow -Wstrict-prototypes -Wwrite-strings \
-	-Winline -Wno-pointer-sign
-
-CFLAGS +=	--param max-inline-insns-single=100
-CFLAGS +=	-fno-reorder-functions
+	-I../gptzfsboot
 
 LD_FLAGS=	-static -N --gc-sections
-CCASFLAGS=	-Wa,--divide
 LIBSTAND=	../../libstand/$(MACH)/libstand.a
 
 include ../Makefile.inc
-
-#.PARALLEL:
 
 all: $(PROG)
 
@@ -105,16 +90,16 @@ x86:
 $(OBJS): machine x86
 
 %.o:	../gptzfsboot/%.S
-	$(CC) $(CFLAGS) $(CCASFLAGS) -c -o $@ $<
+	$(COMPILE.S) $<
 
 %.o:	../../common/%.S
-	$(CC) $(CFLAGS) $(CCASFLAGS) -c -o $@ $<
+	$(COMPILE.S) $<
 
 %.o:	../common/%.c
-	$(COMPILE.c) -o $@ $<
+	$(COMPILE.c) $<
 
 %.o:	../../common/%.c
-	$(COMPILE.c) -o $@ $<
+	$(COMPILE.c) $<
 
 clobber: clean
 

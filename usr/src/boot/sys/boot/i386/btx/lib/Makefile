@@ -14,16 +14,10 @@
 #
 
 include $(SRC)/Makefile.master
+include $(SRC)/boot/sys/boot/Makefile.inc
+include ../../Makefile.inc
 
-AS=	$(GNU_ROOT)/bin/gas
-LD=	$(GNU_ROOT)/bin/gld
-CC=	$(GNUC_ROOT)/bin/gcc
-
-CPPFLAGS= -I./../../common
-CFLAGS=	-O2 -march=i386 -ffreestanding -mno-mmx -mno-3dnow -mno-sse -mno-sse2
-CFLAGS += -mno-sse3 -msoft-float -m32 -std=gnu99
-AS_CPPFLAGS=
-ASFLAGS=--32
+CPPFLAGS += -I./../../common
 
 PROG=	crt0.o
 SRCS=	btxcsu.S btxsys.s btxv86.s
@@ -35,9 +29,6 @@ all install: $(PROG)
 
 $(PROG): $(OBJS)
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $(OBJS)
-
-.S.o:
-	$(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ $<
 
 clobber: clean
 
