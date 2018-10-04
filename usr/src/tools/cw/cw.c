@@ -488,7 +488,7 @@ newictx(void)
 static void
 error(const char *arg)
 {
-	errx(2, "error: mapping failed at or near arg '%s'\n", arg);
+	errx(2, "error: mapping failed at or near arg '%s'", arg);
 }
 
 /*
