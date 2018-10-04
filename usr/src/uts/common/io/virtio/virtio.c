@@ -23,7 +23,7 @@
  * Copyright 2013 Nexenta Systems, Inc.  All rights reserved.
  * Copyright 2012 Alexey Zaytsev <alexey.zaytsev@gmail.com>
  * Copyright (c) 2016 by Delphix. All rights reserved.
- * Copyright 2018 Joyent, Inc.
+ * Copyright 2017 Joyent, Inc.
  */
 
 /* Based on the NetBSD virtio driver by Minoura Makoto. */
