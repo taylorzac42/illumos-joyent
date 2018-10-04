@@ -13,6 +13,14 @@
 # Copyright 2017 Toomas Soome <tsoome@me.com>
 #
 
+# loader.help build needs better awk
+AWK=		/usr/xpg4/bin/awk
+CC=		$(GNUC_ROOT)/bin/gcc
+LD=		$(GNU_ROOT)/bin/gld
+OBJCOPY=	$(GNU_ROOT)/bin/gobjcopy
+OBJDUMP=	$(GNU_ROOT)/bin/gobjdump
+GSTRIP=		$(GNU_ROOT)/bin/gstrip
+
 # Default Console font setup.
 # We want it to be the same as kernel.
 # We build compressed, stripped down version of the default font, so we have
@@ -21,6 +29,32 @@
 FONT=		8x16
 FONT_SRC=	ter-u16n.bdf
 FONT_DIR=	$(SRC)/data/consfonts
+
+PNGLITE=	$(SRC)/common/pnglite
+
+BOOTSRC=	$(SRC)/boot/sys/boot
+LIBSRC=		$(SRC)/boot/lib
+SASRC=		$(LIBSRC)/libstand
+ZFSSRC=		$(SASRC)/zfs
+
+# set standard values
+AS_CPPFLAGS=
+CPPFLAGS=	-D_STANDALONE -nostdinc
+CFLAGS=		-Os -fPIC -ffreestanding -fno-builtin
+CFLAGS +=	-mno-mmx -mno-3dnow -mno-sse -mno-sse2 -mno-sse3 -msoft-float
+CFLAGS +=	-mno-avx -mno-aes
+CFLAGS +=	-std=gnu99
+CFLAGS +=	-Wall
+CCASFLAGS=	-fPIC -Wa,--divide
+ASFLAGS=	--divide
+
+COMPILE.S=	$(CC) $(CCASFLAGS) $(CPPFLAGS) -c
+
+ROOT_BOOT=	$(ROOT)/boot
+ROOTBOOTPROG=$(PROG:%=$(ROOT_BOOT)/%)
+
+$(ROOT_BOOT)/%: %
+	$(INS.file)
 
 #.if ${MACHINE_CPUARCH} == "arm"
 # Do not generate movt/movw, because the relocation fixup for them does not
