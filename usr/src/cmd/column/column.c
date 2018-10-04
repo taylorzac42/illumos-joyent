@@ -27,7 +27,7 @@
  * SUCH DAMAGE.
  */
 /*
- * Portions Copyright (c) 2013  Joyent, Inc.  All rights reserved.
+ * Portions Copyright 2018 Joyent, Inc.
  */
 
 #include <sys/types.h>
