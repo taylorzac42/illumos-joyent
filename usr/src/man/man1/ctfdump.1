@@ -417,6 +417,22 @@ $ mdb ./ctf.out
     cth_strlen = 0x7c9c
 }
 .Ed
+.Lp
+.Sy Example 3
+Dumping C-style output
+.Bd -literal -offset 6n
+$ ctfdump -c ./genunix | more
+/* Types */
+
+typedef Elf64_Addr Addr;
+
+typedef unsigned char Bool;
+
+typedef struct CK_AES_CCM_PARAMS CK_AES_CCM_PARAMS;
+
+typedef struct CK_AES_GCM_PARAMS CK_AES_GCM_PARAMS;
+\&...
+.Ed
 .Sh INTERFACE STABILITY
 The command syntax is
 .Sy Committed .

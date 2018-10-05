@@ -256,9 +256,10 @@ ctf_format_func(ctf_file_t *fp, ctf_decl_t *cd,
 		goto out;
 
 	for (size_t i = 0; i < fi.ctc_argc; i++) {
-		char aname[512] = "unknown_t";
+		char aname[512];
 
-		(void) ctf_type_name(fp, args[i], aname, sizeof (aname));
+		if (ctf_type_name(fp, args[i], aname, sizeof (aname)) != 0)
+			(void) strlcpy(aname, "unknown_t", sizeof (aname));
 
 		ctf_decl_sprintf(cd, "%s%s", aname,
 		    i + 1 == fi.ctc_argc ? "" : ", ");

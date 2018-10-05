@@ -725,7 +725,12 @@ ctfsrc_member_cb(const char *member, ctf_id_t type, ulong_t off, void *arg)
 		(void) snprintf(name, sizeof (name), "unknown_t %s", member);
 	}
 
-	(void) printf("\t%s; /* offset: 0x%lx bytes */\n", name, off);
+	/*
+	 * Yes, the offset is wrong for bitfields, but in general byte offset is
+	 * much friendlier; they can always check the traditional ctfdump output
+	 * if needed.
+	 */
+	(void) printf("\t%s; /* offset: 0x%lx bytes */\n", name, off / NBBY);
 	return (0);
 }
 

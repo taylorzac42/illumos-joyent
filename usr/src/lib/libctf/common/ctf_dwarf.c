@@ -1604,11 +1604,16 @@ ctf_dwarf_create_enum(ctf_die_t *cdp, Dwarf_Die die, ctf_id_t *idp, int isroot)
 			eval = sval;
 		}
 
-		if (ret != 0)
-			return (ret);
+		if (ret != 0) {
+			if (ret != ENOENT)
+				return (ret);
+
+			(void) snprintf(cdp->cd_errbuf, cdp->cd_errlen,
+			    "encountered enumeration without constant value\n");
+			return (ECTF_CONVBKERR);
+		}
 
 		ret = ctf_add_enumerator(cdp->cd_ctfp, id, name, eval);
-
 		if (ret == CTF_ERR) {
 			(void) snprintf(cdp->cd_errbuf, cdp->cd_errlen,
 			    "failed to add enumarator %s (%d) to %d\n",
