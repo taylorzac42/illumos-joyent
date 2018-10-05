@@ -324,7 +324,6 @@ ctf_type_qlname(ctf_file_t *fp, ctf_id_t type, char *buf, size_t len,
 			const ctf_type_t *tp =
 			    ctf_lookup_by_id(&rfp, cdp->cd_type);
 			const char *name = ctf_strptr(rfp, tp->ctt_name);
-			ctf_decl_node_t *next = ctf_list_next(cdp);
 
 			if (k != CTF_K_POINTER && k != CTF_K_ARRAY)
 				ctf_decl_sprintf(&cd, " ");
