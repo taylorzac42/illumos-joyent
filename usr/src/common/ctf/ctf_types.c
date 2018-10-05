@@ -208,7 +208,7 @@ static const char *
 ctf_format_int(ctf_decl_t *cd, const char *vname, const char *qname,
     const char *name)
 {
-	char *c;
+	const char *c;
 
 	if (vname == NULL) {
 		if (qname != NULL)
@@ -223,6 +223,7 @@ ctf_format_int(ctf_decl_t *cd, const char *vname, const char *qname,
 		return (vname);
 	}
 
+	/* "unsigned int mybits:23" */
 	ctf_decl_sprintf(cd, "%.*s %s%s", c - name, name, vname, c);
 	return (NULL);
 }
@@ -232,51 +233,50 @@ ctf_format_func(ctf_file_t *fp, ctf_decl_t *cd,
     const char *vname, ctf_id_t id, int want_func_args)
 {
 	ctf_funcinfo_t fi;
+	/* We'll presume zone_create() is a bad example. */
 	ctf_id_t args[20];
 
-	if (!want_func_args) {
-		ctf_decl_sprintf(cd, "%s()", vname == NULL ? "" : vname);
-		return;
-	}
+	ctf_decl_sprintf(cd, "%s(", vname == NULL ? "" : vname);
 
-	if (ctf_func_info_by_id(fp, id, &fi) != 0) {
-		ctf_decl_sprintf(cd, "%s()", vname);
-		return;
-	}
+	if (!want_func_args)
+		goto out;
+
+	if (ctf_func_info_by_id(fp, id, &fi) != 0)
+		goto out;
 
 	if (fi.ctc_argc > ARRAY_SIZE(args))
 		fi.ctc_argc = ARRAY_SIZE(args);
 
-	ctf_decl_sprintf(cd, "%s(", vname == NULL ? "" : vname);
-
 	if (fi.ctc_argc == 0) {
 		ctf_decl_sprintf(cd, "void");
-	} else {
-		if (ctf_func_args_by_id(fp, id, fi.ctc_argc, args) != 0) {
-			ctf_decl_sprintf(cd, ")");
-			return;
-		}
-
-		for (size_t i = 0; i < fi.ctc_argc; i++) {
-			char aname[512] = "unknown_t";
-
-			(void) ctf_type_name(fp, args[i], aname,
-			    sizeof (aname));
-
-			ctf_decl_sprintf(cd, "%s%s", aname,
-			    (i + 1 != fi.ctc_argc) ? ", " : "");
-		}
+		goto out;
 	}
 
+	if (ctf_func_args_by_id(fp, id, fi.ctc_argc, args) != 0)
+		goto out;
+
+	for (size_t i = 0; i < fi.ctc_argc; i++) {
+		char aname[512] = "unknown_t";
+
+		(void) ctf_type_name(fp, args[i], aname, sizeof (aname));
+
+		ctf_decl_sprintf(cd, "%s%s", aname,
+		    i + 1 == fi.ctc_argc ? "" : ", ");
+	}
+
+	if (fi.ctc_flags & CTF_FUNC_VARARG)
+		ctf_decl_sprintf(cd, "%s...", fi.ctc_argc == 0 ? "" : ", ");
+
+out:
 	ctf_decl_sprintf(cd, ")");
 }
 
 /*
- * Lookup the given type ID and print a string name for it into buf.  Return
- * the actual number of bytes (not including \0) needed to format the name.
+ * Lookup the given type ID and print a string name for it into buf.  Return the
+ * actual number of bytes (not including \0) needed to format the name.
  *
  * "vname" is an optional variable name or similar, so array suffix formatting,
- * bitfields, and functions are C-correct. (This is not perfect, as can be seen
+ * bitfields, and functions are C-correct.  (This is not perfect, as can be seen
  * in kiconv_ops_t.)
  */
 static ssize_t
@@ -391,6 +391,11 @@ ctf_type_qlname(ctf_file_t *fp, ctf_id_t type, char *buf, size_t len,
 		}
 
 		if (rp == prec) {
+			/*
+			 * Peek ahead: if we're going to hit a function,
+			 * we want to insert its name now before this closing
+			 * bracket.
+			 */
 			if (vname != NULL && prec < CTF_PREC_FUNCTION) {
 				cdp = ctf_list_next(
 				    &cd.cd_nodes[CTF_PREC_FUNCTION]);

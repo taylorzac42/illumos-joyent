@@ -1596,11 +1596,11 @@ ctf_dwarf_create_enum(ctf_die_t *cdp, Dwarf_Die die, ctf_id_t *idp, int isroot)
 		 * Since negative values will fail ctf_dwarf_unsigned(), we try
 		 * that first to make sure we get the right value.
 		 */
-		if ((ret = ctf_dwarf_unsigned(cdp, arg,
-		    DW_AT_const_value, &uval)) == 0) {
+		if ((ret = ctf_dwarf_unsigned(cdp, arg, DW_AT_const_value,
+		    &uval)) == 0) {
 			eval = (int)uval;
-		} else if ((ret = ctf_dwarf_signed(cdp, arg,
-		    DW_AT_const_value, &sval)) == 0) {
+		} else if ((ret = ctf_dwarf_signed(cdp, arg, DW_AT_const_value,
+		    &sval)) == 0) {
 			eval = sval;
 		}
 
@@ -2023,8 +2023,8 @@ ctf_dwarf_convert_variable(ctf_die_t *cdp, Dwarf_Die die)
 	 * not this site.  It's sufficient for what we need, however: in
 	 * particular, we should find DW_AT_external as needed there.
 	 */
-	if ((ret = ctf_dwarf_refdie(cdp, die,
-	    DW_AT_specification, &tdie)) == 0) {
+	if ((ret = ctf_dwarf_refdie(cdp, die, DW_AT_specification,
+	    &tdie)) == 0) {
 		Dwarf_Off offset;
 		if ((ret = ctf_dwarf_offset(cdp, tdie, &offset)) != 0)
 			return (ret);

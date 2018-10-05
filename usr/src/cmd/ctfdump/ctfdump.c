@@ -35,6 +35,8 @@
 #include <string.h>
 #include <strings.h>
 
+#define	MAX_NAMELEN (512)
+
 typedef enum ctfdump_arg {
 	CTFDUMP_OBJECTS =	0x001,
 	CTFDUMP_FUNCTIONS =	0x002,
@@ -70,7 +72,7 @@ typedef struct ctfdump_stat {
 } ctfdump_stat_t;
 
 typedef struct {
-	char ci_name[512];
+	char ci_name[MAX_NAMELEN];
 	ctf_id_t ci_id;
 	ulong_t ci_symidx;
 	ctf_funcinfo_t ci_funcinfo;
@@ -155,9 +157,10 @@ ctfdump_usage(const char *fmt, ...)
 		va_end(ap);
 	}
 
-	(void) fprintf(stderr, "Usage: %s [-dfhlsSt] [-p parent] [-u outfile] "
+	(void) fprintf(stderr, "Usage: %s [-cdfhlsSt] [-p parent] [-u outfile] "
 	    "file\n"
 	    "\n"
+	    "\t-c  dump C-style output\n"
 	    "\t-d  dump object data\n"
 	    "\t-f  dump function data\n"
 	    "\t-h  dump the CTF header\n"
@@ -513,7 +516,7 @@ ctfdump_types_cb(ctf_id_t id, boolean_t root, void *arg)
 	_NOTE(ARGUNUSED(arg));
 	int kind, i, count;
 	ctf_id_t ref;
-	char name[512], ienc[128];
+	char name[MAX_NAMELEN], ienc[128];
 	const char *encn;
 	ctf_funcinfo_t ctc;
 	ctf_arinfo_t ar;
@@ -700,7 +703,7 @@ ctfsrc_refname(ctf_id_t id, char *buf, size_t bufsize)
 	ctf_id_t ref;
 
 	if ((ref = ctf_type_reference(g_fp, id)) == CTF_ERR) {
-		ctfdump_fatal("failed to get reference type for %d: "
+		ctfdump_fatal("failed to get reference type for %ld: "
 		    "%s\n", id, ctf_errmsg(ctf_errno(g_fp)));
 	}
 
@@ -711,12 +714,14 @@ static int
 ctfsrc_member_cb(const char *member, ctf_id_t type, ulong_t off, void *arg)
 {
 	_NOTE(ARGUNUSED(arg));
-	char name[512];
+	char name[MAX_NAMELEN];
 
 	if (ctf_type_cname(g_fp, type, name, sizeof (name), member) == NULL) {
-		if (ctf_errno(g_fp) != ECTF_NOPARENT)
+		if (ctf_errno(g_fp) != ECTF_NOPARENT) {
 			ctfdump_fatal("type %lu missing name: %s\n", type,
 			    ctf_errmsg(ctf_errno(g_fp)));
+		}
+
 		(void) snprintf(name, sizeof (name), "unknown_t %s", member);
 	}
 
@@ -753,7 +758,7 @@ ctfsrc_collect_types_cb(ctf_id_t id, boolean_t root, void *arg)
 static void
 ctfsrc_type(ctf_id_t id, const char *name)
 {
-	char refname[512];
+	char refname[MAX_NAMELEN];
 	ctf_id_t ref;
 	ssize_t size;
 	int kind;
@@ -767,23 +772,23 @@ ctfsrc_type(ctf_id_t id, const char *name)
 	case CTF_K_STRUCT:
 	case CTF_K_UNION:
 		/*
-		 * Delay printing anonymous structs; a later typedef to them
-		 * will pick it up.
+		 * Delay printing anonymous SOUs; a later typedef will usually
+		 * pick them up.
 		 */
 		if (is_anon_refname(name))
 			break;
 
-		size = ctf_type_size(g_fp, id);
-		if (size == CTF_ERR) {
+		if ((size = ctf_type_size(g_fp, id)) == CTF_ERR) {
 			ctfdump_fatal("failed to get size of %s: %s\n", name,
 			    ctf_errmsg(ctf_errno(g_fp)));
 		}
 
 		(void) printf("%s { /* 0x%x bytes */\n", name, size);
 
-		if (ctf_member_iter(g_fp, id, ctfsrc_member_cb, NULL) != 0)
+		if (ctf_member_iter(g_fp, id, ctfsrc_member_cb, NULL) != 0) {
 			ctfdump_fatal("failed to iterate members of %s: %s\n",
 			    name, ctf_errmsg(ctf_errno(g_fp)));
+		}
 
 		(void) printf("};\n\n");
 		break;
@@ -830,8 +835,7 @@ ctfsrc_type(ctf_id_t id, const char *name)
 
 			(void) printf("} %s;\n\n", name);
 		} else {
-			size = ctf_type_size(g_fp, ref);
-			if (size == CTF_ERR) {
+			if ((size = ctf_type_size(g_fp, ref)) == CTF_ERR) {
 				ctfdump_fatal("failed to get size of %s: %s\n",
 				    refname, ctf_errmsg(ctf_errno(g_fp)));
 			}
@@ -866,9 +870,8 @@ ctfsrc_type(ctf_id_t id, const char *name)
 	default:
 		ctfdump_fatal("encountered unknown kind for type %s: %d\n",
 		    name, kind);
+		break;
 	}
-
-	ctfdump_printf(CTFDUMP_TYPES, "\n");
 }
 
 static int
@@ -892,11 +895,11 @@ ctfsrc_collect_objects_cb(const char *name, ctf_id_t id,
 static void
 ctfsrc_object(ctf_id_t id, const char *name)
 {
-	char tname[512];
+	char tname[MAX_NAMELEN];
 
 	if (ctf_type_cname(g_fp, id, tname, sizeof (tname), name) == NULL) {
 		if (ctf_errno(g_fp) != ECTF_NOPARENT) {
-			ctfdump_fatal("type %lu missing name: %s\n", id,
+			ctfdump_fatal("type %ld missing name: %s\n", id,
 			    ctf_errmsg(ctf_errno(g_fp)));
 		}
 		(void) snprintf(tname, sizeof (tname), "unknown_t %s", name);
@@ -924,7 +927,7 @@ static void
 ctfsrc_function(ctf_idname_t *idn)
 {
 	ctf_funcinfo_t *cfi = &idn->ci_funcinfo;
-	char name[512] = "unknown_t";
+	char name[MAX_NAMELEN] = "unknown_t";
 
 	(void) ctf_type_name(g_fp, cfi->ctc_return, name, sizeof (name));
 
@@ -935,7 +938,8 @@ ctfsrc_function(ctf_idname_t *idn)
 		if (ctf_func_args(g_fp, idn->ci_symidx,
 		    g_nfargc, g_fargc) == CTF_ERR) {
 			ctfdump_fatal("failed to get arguments for function "
-			    "%s: %s\n", name, ctf_errmsg(ctf_errno(g_fp)));
+			    "%s: %s\n", idn->ci_name,
+			    ctf_errmsg(ctf_errno(g_fp)));
 		}
 
 		for (size_t i = 0; i < cfi->ctc_argc; i++) {
@@ -970,12 +974,12 @@ static void
 ctfdump_source(void)
 {
 	ulong_t nr_syms = ctf_nr_syms(g_fp);
-	ctf_id_t max = ctf_max_id(g_fp);
+	ctf_id_t max_id = ctf_max_id(g_fp);
 	size_t count = 0;
 
 	(void) printf("/* Types */\n\n");
 
-	if ((idnames = calloc(max + 1, sizeof (idnames[0]))) == NULL) {
+	if ((idnames = calloc(max_id + 1, sizeof (idnames[0]))) == NULL) {
 		ctfdump_fatal("failed to alloc idnames: %s\n",
 		    strerror(errno));
 	}
@@ -987,9 +991,9 @@ ctfdump_source(void)
 		g_exit = 1;
 	}
 
-	qsort(idnames, max, sizeof (ctf_idname_t), idname_compare);
+	qsort(idnames, max_id, sizeof (ctf_idname_t), idname_compare);
 
-	for (size_t i = 0; i < max; i++) {
+	for (size_t i = 0; i < max_id; i++) {
 		if (idnames[i].ci_id != 0)
 			ctfsrc_type(idnames[i].ci_id, idnames[i].ci_name);
 	}
@@ -1012,9 +1016,8 @@ ctfdump_source(void)
 
 	qsort(idnames, count, sizeof (ctf_idname_t), idname_compare);
 
-	for (size_t i = 0; i < count; i++) {
+	for (size_t i = 0; i < count; i++)
 		ctfsrc_object(idnames[i].ci_id, idnames[i].ci_name);
-	}
 
 	free(idnames);
 
@@ -1036,12 +1039,10 @@ ctfdump_source(void)
 
 	qsort(idnames, count, sizeof (ctf_idname_t), idname_compare);
 
-	for (size_t i = 0; i < count; i++) {
+	for (size_t i = 0; i < count; i++)
 		ctfsrc_function(&idnames[i]);
-	}
 
 	free(idnames);
-
 }
 
 static void
@@ -1132,7 +1133,7 @@ main(int argc, char *argv[])
 	argv += optind;
 
 	if ((g_dump & CTFDUMP_SOURCE) && !!(g_dump & ~CTFDUMP_SOURCE)) {
-		ctfdump_usage("-s must be specified on its own\n");
+		ctfdump_usage("-c must be specified on its own\n");
 		return (2);
 	}
 
