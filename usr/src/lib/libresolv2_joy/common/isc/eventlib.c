@@ -1,6 +1,7 @@
 /*
  * Copyright (c) 2004 by Internet Systems Consortium, Inc. ("ISC")
  * Copyright (c) 1995-1999 by Internet Software Consortium
+ * Copyright 2018 Joyent, Inc.
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -17,10 +18,6 @@
 
 /* eventlib.c - implement glue for the eventlib
  * vix 09sep95 [initial]
- */
-
-/*
- * Copyright 2018 Joyent, Inc.
  */
 
 #include "port_before.h"
