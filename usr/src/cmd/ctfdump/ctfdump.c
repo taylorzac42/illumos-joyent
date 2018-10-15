@@ -726,11 +726,16 @@ ctfsrc_member_cb(const char *member, ctf_id_t type, ulong_t off, void *arg)
 	}
 
 	/*
-	 * Yes, the offset is wrong for bitfields, but in general byte offset is
-	 * much friendlier; they can always check the traditional ctfdump output
-	 * if needed.
+	 * A byte offset is friendlier, but we'll print bits too if it's not
+	 * aligned (i.e. a bitfield).
 	 */
-	(void) printf("\t%s; /* offset: 0x%lx bytes */\n", name, off / NBBY);
+	if (off % NBBY != 0) {
+		(void) printf("\t%s; /* offset: %lu bytes (%lu bits) */\n",
+		    name, off / NBBY, off);
+	} else {
+		(void) printf("\t%s; /* offset: %lu bytes */\n",
+		    name, off / NBBY);
+	}
 	return (0);
 }
 
