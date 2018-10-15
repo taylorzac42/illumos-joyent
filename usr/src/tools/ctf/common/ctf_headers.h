@@ -64,17 +64,21 @@
  *    when <sys/ctf_api.h> is included via a nested #include rather than
  *    an explicit path #include.
  *
- * Finally, to make life easier, we also include the current definitions of the
- * ccompile.h and sysmacros.h headers to make it so we have to rely less on the
- * build system contents.
+ * We'll also include the local ccompile.h - older build systems often lack
+ * useful definitions like __unused.  Finally, we'll also define ARRAY_SIZE:
+ * unfortunately, older systems sysmacros.h only have this defined for the
+ * kernel, and we can't easily pick it up otherwise.
  */
 
-#include <uts/common/sys/sysmacros.h>
 #include <uts/common/sys/ccompile.h>
 #include <uts/common/sys/ctf.h>
 #include <uts/common/sys/ctf_api.h>
 #include <common/ctf/ctf_impl.h>
 #include <lib/libctf/common/libctf.h>
 #include <lib/libctf/common/libctf_impl.h>
+
+#if !defined(ARRAY_SIZE)
+#define	ARRAY_SIZE(x)	(sizeof (x) / sizeof (x[0]))
+#endif
 
 #endif /* _CTF_HEADERS_H */
